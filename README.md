@@ -50,5 +50,13 @@ Classification experiments use a FACIL integration in `vendor/FACIL` when that
 vendor checkout is available locally. The standalone regression, diffusion, and
 segmentation scripts use the same IEWC configuration interface.
 
+## Citation
+
+```markdown
+Improved Elastic Weight Consolidation empirical repository. Zenodo.
+DOI: 10.5281/zenodo.20724067
+URL: https://zenodo.org/records/20724067
+```
+
 For paper provenance, commit `00f9d6d` records the pre-cleanup repository state
 used for the reported empirical results.
