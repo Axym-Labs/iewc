@@ -1,0 +1,13 @@
+.venv/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+
+data/
+outputs/
+checkpoints/
+wandb/
+
+vendor/
+
+paper_writeup.md

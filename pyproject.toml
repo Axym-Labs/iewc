@@ -1,0 +1,13 @@
+[project]
+name = "iewc"
+version = "0.1.0"
+description = "Empirical utilities for Improved Elastic Weight Consolidation experiments."
+requires-python = ">=3.12"
+dependencies = [
+  "avalanche-lib>=0.6.0",
+  "diffusers>=0.38.0",
+  "torch",
+]
+
+[tool.setuptools.packages.find]
+include = ["iewc*"]
