@@ -38,7 +38,7 @@ low-rank IEWC plugin paths. Existing keyword arguments such as `ewc_lambda`,
 
 ```bibtex
 @misc{iewc_empirical_repository_2026,
-  title = {Improved Elastic Weight Consolidation Empirical Repository},
+  title = {Improved Elastic Weight Consolidation as an Optimization Constraint for Continual Learning},
   year = {2026},
   publisher = {Zenodo},
   doi = {10.5281/zenodo.20724067},
