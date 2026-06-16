@@ -34,6 +34,18 @@ The same configuration object is accepted by the maintained diagonal and
 low-rank IEWC plugin paths. Existing keyword arguments such as `ewc_lambda`,
 `tau`, and `output_metric` remain supported for compatibility.
 
+## Citation
+
+```bibtex
+@misc{iewc_empirical_repository_2026,
+  title = {Improved Elastic Weight Consolidation Empirical Repository},
+  year = {2026},
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.20724067},
+  url = {https://zenodo.org/records/20724067}
+}
+```
+
 ## Empirical Artifacts
 
 Paper-facing tables and figures are generated with:
@@ -49,14 +61,6 @@ figures live under `docs/empirical-evidence/artifacts/paper-plots/`.
 Classification experiments use a FACIL integration in `vendor/FACIL` when that
 vendor checkout is available locally. The standalone regression, diffusion, and
 segmentation scripts use the same IEWC configuration interface.
-
-## Citation
-
-```markdown
-Improved Elastic Weight Consolidation empirical repository. Zenodo.
-DOI: 10.5281/zenodo.20724067
-URL: https://zenodo.org/records/20724067
-```
 
 For paper provenance, commit `00f9d6d` records the pre-cleanup repository state
 used for the reported empirical results.
