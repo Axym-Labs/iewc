@@ -4,6 +4,7 @@ import torch
 from torch import nn
 from torch.utils.data import TensorDataset
 
+from iewc.config import IEWCConfig
 from iewc.importance import ImportanceEstimator
 
 
@@ -124,6 +125,47 @@ class ImportanceEstimatorTests(unittest.TestCase):
         self.assertEqual(result.sample_count, len(dataset))
         self.assertEqual(len(result.loss_scales), len(dataset))
         self.assertTrue(torch.allclose(result.loss_scales, torch.tensor(scales)))
+
+    def test_ief_accepts_four_parameter_config(self):
+        model = make_model()
+        dataset = make_dataset()
+        criterion = nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+        config = IEWCConfig(
+            lambda_=5.0,
+            tau=0.25,
+            geometry="euclidean",
+            sample_weighting="uniform",
+        )
+
+        configured = ImportanceEstimator(kind="ief_diag", config=config).compute(
+            model=model,
+            criterion=criterion,
+            optimizer=optimizer,
+            dataset=dataset,
+            device=torch.device("cpu"),
+            batch_size=2,
+        )
+        direct = ImportanceEstimator(kind="ief_diag", tau=0.25).compute(
+            model=model,
+            criterion=criterion,
+            optimizer=optimizer,
+            dataset=dataset,
+            device=torch.device("cpu"),
+            batch_size=2,
+        )
+
+        self.assertTrue(
+            torch.allclose(
+                flatten_importances(configured.importances),
+                flatten_importances(direct.importances),
+            )
+        )
+
+    def test_config_rejects_unsupported_weighting(self):
+        config = IEWCConfig(lambda_=1.0, tau=0.0, sample_weighting="not_uniform")
+        with self.assertRaises(NotImplementedError):
+            config.validate()
 
     def test_ief_can_use_wasserstein_output_metric_for_loss_scale(self):
         model = nn.Linear(2, 4, bias=False)

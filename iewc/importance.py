@@ -9,6 +9,7 @@ from torch.optim import Optimizer
 from torch.utils.data import DataLoader, Dataset
 
 from .output_metrics import wasserstein_1d_cdf_dual_quadratic_form
+from .config import IEWCConfig
 
 
 ImportanceKind = Literal["ef", "ewc_dr", "ief_diag"]
@@ -31,9 +32,22 @@ class ImportanceEstimator:
         self,
         *,
         kind: ImportanceKind,
-        tau: float = 0.0,
-        output_metric: OutputMetricKind = "euclidean",
+        tau: float | None = None,
+        output_metric: OutputMetricKind | None = None,
+        config: IEWCConfig | None = None,
     ):
+        if config is not None:
+            config.validate()
+            if tau is not None and float(tau) != config.tau:
+                raise ValueError("tau conflicts with IEWCConfig.tau")
+            if output_metric is not None and output_metric != config.output_metric:
+                raise ValueError("output_metric conflicts with IEWCConfig.geometry")
+            tau = config.tau
+            output_metric = config.output_metric
+        if tau is None:
+            tau = 0.0
+        if output_metric is None:
+            output_metric = "euclidean"
         if kind not in {"ef", "ewc_dr", "ief_diag"}:
             raise ValueError(f"Unknown importance kind: {kind}")
         if tau < 0:

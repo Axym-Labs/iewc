@@ -2,6 +2,8 @@
 *.egg-info/
 __pycache__/
 .pytest_cache/
+.codex/
+.codex-autoresearch.md
 
 data/
 outputs/
@@ -11,3 +13,13 @@ wandb/
 vendor/
 
 paper_writeup.md
+
+docs/empirical-evidence/artifacts/*
+!docs/empirical-evidence/artifacts/paper-tables-and-plots.md
+!docs/empirical-evidence/artifacts/paper-plots/
+!docs/empirical-evidence/artifacts/paper-plots/**
+!docs/empirical-evidence/artifacts/joint-lambda-validation/
+docs/empirical-evidence/artifacts/joint-lambda-validation/*
+!docs/empirical-evidence/artifacts/joint-lambda-validation/joint-lambda-validation.md
+!docs/empirical-evidence/artifacts/joint-lambda-validation/plots/
+!docs/empirical-evidence/artifacts/joint-lambda-validation/plots/**

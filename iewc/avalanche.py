@@ -7,6 +7,7 @@ from torch import nn
 from torch.optim import Optimizer
 from torch.utils.data import Dataset
 
+from .config import IEWCConfig
 from .importance import (
     ImportanceEstimator,
     ImportanceKind,
@@ -20,17 +21,35 @@ class IEWCPlugin(EWCPlugin):
 
     def __init__(
         self,
-        ewc_lambda: float,
+        ewc_lambda: float | None = None,
         *,
+        config: IEWCConfig | None = None,
         importance_kind: ImportanceKind = "ief_diag",
-        tau: float = 0.0,
-        output_metric: OutputMetricKind = "euclidean",
+        tau: float | None = None,
+        output_metric: OutputMetricKind | None = None,
         max_importance_samples: int | None = None,
         importance_num_workers: int | None = None,
         mode: str = "separate",
         decay_factor=None,
         keep_importance_data: bool = False,
     ):
+        if config is not None:
+            config.validate()
+            if ewc_lambda is not None and float(ewc_lambda) != config.lambda_:
+                raise ValueError("ewc_lambda conflicts with IEWCConfig.lambda_")
+            if tau is not None and float(tau) != config.tau:
+                raise ValueError("tau conflicts with IEWCConfig.tau")
+            if output_metric is not None and output_metric != config.output_metric:
+                raise ValueError("output_metric conflicts with IEWCConfig.geometry")
+            ewc_lambda = config.lambda_
+            tau = config.tau
+            output_metric = config.output_metric
+        if ewc_lambda is None:
+            raise ValueError("ewc_lambda is required unless config is provided")
+        if tau is None:
+            tau = 0.0
+        if output_metric is None:
+            output_metric = "euclidean"
         super().__init__(
             ewc_lambda=ewc_lambda,
             mode=mode,
@@ -56,8 +75,12 @@ class IEWCPlugin(EWCPlugin):
     ) -> dict[str, ParamData]:
         estimator = ImportanceEstimator(
             kind=self.importance_kind,
-            tau=self.tau,
-            output_metric=self.output_metric,
+            config=IEWCConfig(
+                lambda_=self.ewc_lambda,
+                tau=self.tau,
+                geometry=self.output_metric,
+                sample_weighting="uniform",
+            ),
         )
         if (
             self.max_importance_samples is not None

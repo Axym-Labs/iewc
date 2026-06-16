@@ -8,6 +8,7 @@ from torch import Tensor, nn
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader, Dataset, Subset
 
+from .config import IEWCConfig
 from .output_metrics import wasserstein_1d_cdf_dual_quadratic_form
 
 
@@ -207,10 +208,23 @@ class LowRankImportanceEstimator:
         *,
         kind: LowRankImportanceKind,
         rank: int,
-        tau: float = 0.0,
-        output_metric: LowRankOutputMetricKind = "euclidean",
+        tau: float | None = None,
+        output_metric: LowRankOutputMetricKind | None = None,
+        config: IEWCConfig | None = None,
         min_eigenvalue: float = 1e-12,
     ):
+        if config is not None:
+            config.validate()
+            if tau is not None and float(tau) != config.tau:
+                raise ValueError("tau conflicts with IEWCConfig.tau")
+            if output_metric is not None and output_metric != config.output_metric:
+                raise ValueError("output_metric conflicts with IEWCConfig.geometry")
+            tau = config.tau
+            output_metric = config.output_metric
+        if tau is None:
+            tau = 0.0
+        if output_metric is None:
+            output_metric = "euclidean"
         if kind not in {
             "ef_low_rank",
             "ief_low_rank",
@@ -402,18 +416,36 @@ class LowRankIEWCPlugin(SupervisedPlugin):
 
     def __init__(
         self,
-        ewc_lambda: float,
+        ewc_lambda: float | None = None,
         *,
+        config: IEWCConfig | None = None,
         importance_kind: LowRankImportanceKind = "ief_low_rank",
         rank: int = 20,
-        tau: float = 0.0,
-        output_metric: LowRankOutputMetricKind = "euclidean",
+        tau: float | None = None,
+        output_metric: LowRankOutputMetricKind | None = None,
         max_importance_samples: int | None = None,
         importance_sample_seed: int = 0,
         importance_num_workers: int | None = None,
         mode: Literal["separate", "online"] = "separate",
     ):
         super().__init__()
+        if config is not None:
+            config.validate()
+            if ewc_lambda is not None and float(ewc_lambda) != config.lambda_:
+                raise ValueError("ewc_lambda conflicts with IEWCConfig.lambda_")
+            if tau is not None and float(tau) != config.tau:
+                raise ValueError("tau conflicts with IEWCConfig.tau")
+            if output_metric is not None and output_metric != config.output_metric:
+                raise ValueError("output_metric conflicts with IEWCConfig.geometry")
+            ewc_lambda = config.lambda_
+            tau = config.tau
+            output_metric = config.output_metric
+        if ewc_lambda is None:
+            raise ValueError("ewc_lambda is required unless config is provided")
+        if tau is None:
+            tau = 0.0
+        if output_metric is None:
+            output_metric = "euclidean"
         if mode not in {"separate", "online"}:
             raise ValueError("mode must be 'separate' or 'online'")
         self.ewc_lambda = float(ewc_lambda)
@@ -473,8 +505,12 @@ class LowRankIEWCPlugin(SupervisedPlugin):
         estimator = LowRankImportanceEstimator(
             kind=self.importance_kind,
             rank=self.rank,
-            tau=self.tau,
-            output_metric=self.output_metric,
+            config=IEWCConfig(
+                lambda_=self.ewc_lambda,
+                tau=self.tau,
+                geometry=self.output_metric,
+                sample_weighting="uniform",
+            ),
         )
         result = estimator.compute(
             model=strategy.model,

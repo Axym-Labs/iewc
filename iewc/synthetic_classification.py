@@ -10,6 +10,7 @@ from avalanche.training.supervised import Naive
 from torch import nn
 
 from .avalanche import IEWCPlugin
+from .config import IEWCConfig
 
 
 SEQUENTIAL_ALIASES = {"sequential", "naive"}
@@ -89,9 +90,11 @@ def run_one(
     if canonical_method != "sequential":
         plugins.append(
             IEWCPlugin(
-                ewc_lambda=config.ewc_lambda,
+                config=IEWCConfig(
+                    lambda_=config.ewc_lambda,
+                    tau=0.0 if tau is None else tau,
+                ),
                 importance_kind=canonical_method,
-                tau=0.0 if tau is None else tau,
             )
         )
 

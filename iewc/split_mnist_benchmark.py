@@ -13,6 +13,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from .avalanche import IEWCPlugin
+from .config import IEWCConfig
 from .low_rank import LowRankIEWCPlugin
 
 
@@ -277,9 +278,11 @@ def run_one(
     if canonical_method in {"ef", "ewc_dr", "ief_diag"}:
         plugins.append(
             IEWCPlugin(
-                ewc_lambda=config.ewc_lambda,
+                config=IEWCConfig(
+                    lambda_=config.ewc_lambda,
+                    tau=0.0 if tau is None else tau,
+                ),
                 importance_kind=canonical_method,
-                tau=0.0 if tau is None else tau,
                 max_importance_samples=config.max_importance_samples,
             )
         )
@@ -295,9 +298,11 @@ def run_one(
     }:
         plugins.append(
             LowRankIEWCPlugin(
-                ewc_lambda=config.ewc_lambda,
+                config=IEWCConfig(
+                    lambda_=config.ewc_lambda,
+                    tau=0.0 if tau is None else tau,
+                ),
                 importance_kind=canonical_method,
-                tau=0.0 if tau is None else tau,
                 rank=config.rank_values[0] if rank is None else rank,
                 max_importance_samples=config.max_importance_samples,
                 importance_sample_seed=config.importance_sample_seed,

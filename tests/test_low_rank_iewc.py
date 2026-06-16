@@ -5,6 +5,7 @@ import torch
 from torch import nn
 from torch.utils.data import TensorDataset
 
+from iewc.config import IEWCConfig
 from iewc.low_rank import (
     LowRankIEWCPlugin,
     LowRankImportanceEstimator,
@@ -242,6 +243,34 @@ class LowRankIEWCTests(unittest.TestCase):
         plugin.before_backward(strategy)
 
         self.assertGreater(strategy.loss.item(), 0.0)
+        self.assertEqual(plugin.last_importance_result.rank, 2)
+
+    def test_low_rank_plugin_accepts_four_parameter_config(self):
+        model = make_model()
+        dataset = make_dataset()
+        criterion = nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+        config = IEWCConfig(lambda_=10.0, tau=0.25)
+        plugin = LowRankIEWCPlugin(
+            config=config,
+            importance_kind="ief_low_rank",
+            rank=2,
+        )
+
+        plugin.after_training_exp(
+            types.SimpleNamespace(
+                clock=types.SimpleNamespace(train_exp_counter=0),
+                model=model,
+                _criterion=criterion,
+                optimizer=optimizer,
+                experience=types.SimpleNamespace(dataset=dataset),
+                device=torch.device("cpu"),
+                train_mb_size=2,
+            )
+        )
+
+        self.assertEqual(plugin.ewc_lambda, config.lambda_)
+        self.assertEqual(plugin.tau, config.tau)
         self.assertEqual(plugin.last_importance_result.rank, 2)
 
     def test_low_rank_plus_diagonal_plugin_penalty_matches_manual_formula(self):
