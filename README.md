@@ -49,3 +49,6 @@ figures live under `docs/empirical-evidence/artifacts/paper-plots/`.
 Classification experiments use a FACIL integration in `vendor/FACIL` when that
 vendor checkout is available locally. The standalone regression, diffusion, and
 segmentation scripts use the same IEWC configuration interface.
+
+For paper provenance, commit `00f9d6d` records the pre-cleanup repository state
+used for the reported empirical results.
