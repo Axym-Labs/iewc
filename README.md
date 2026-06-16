@@ -1,7 +1,8 @@
 # Improved Elastic Weight Consolidation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20724067.svg)](https://doi.org/10.5281/zenodo.20724067)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20724067-blue)](https://doi.org/10.5281/zenodo.20724067)
 [![PDF](https://img.shields.io/badge/PDF-paper-blue)](https://davidewiest.com/files/improved-elastic-weight-consolidation.pdf)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.12-blue)](https://www.python.org/)
 
 This repository contains the code used for the empirical IEWC experiments. The
 maintained implementation exposes IEWC through `IEWCConfig`, which mirrors the
