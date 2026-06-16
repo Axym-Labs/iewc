@@ -1,5 +1,8 @@
 # Improved Elastic Weight Consolidation
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20724067.svg)](https://doi.org/10.5281/zenodo.20724067)
+[![PDF](https://img.shields.io/badge/PDF-paper-blue)](https://davidewiest.com/files/improved-elastic-weight-consolidation.pdf)
+
 This repository contains the code used for the empirical IEWC experiments. The
 maintained implementation exposes IEWC through `IEWCConfig`, which mirrors the
 paper's four-tuple parametrization and can be passed directly to the Avalanche
