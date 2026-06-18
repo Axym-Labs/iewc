@@ -7,7 +7,7 @@
 This repository contains the code used for the empirical IEWC experiments. The
 maintained implementation exposes IEWC through `IEWCConfig`, which mirrors the
 paper's four-tuple parametrization and can be passed directly to the Avalanche
-plugin path.
+plugin.
 
 ## Install
 
@@ -35,13 +35,13 @@ plugin = IEWCPlugin(config=iewc)
 ```
 
 The same configuration object is accepted by the maintained diagonal and
-low-rank IEWC plugin paths. Existing keyword arguments such as `ewc_lambda`,
+low-rank IEWC plugins. Existing keyword arguments such as `ewc_lambda`,
 `tau`, and `output_metric` remain supported for compatibility.
 
 ## Citation
 
 ```bibtex
-@misc{iewc_empirical_repository_2026,
+@misc{IEWC,
   title = {Improved Elastic Weight Consolidation as an Optimization Constraint for Continual Learning},
   year = {2026},
   publisher = {Zenodo},
