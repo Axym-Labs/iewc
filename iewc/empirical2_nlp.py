@@ -132,7 +132,13 @@ def _glue_dataset(task: str, tokenizer, *, split: str, limit: int, max_length: i
 
     if task not in GLUE_FIELDS:
         raise ValueError(f"Unsupported GLUE task: {task}")
-    raw = load_dataset("glue", task, split=split)
+    try:
+        raw = load_dataset("glue", task, split=split)
+    except Exception as bare_error:
+        try:
+            raw = load_dataset("nyu-mll/glue", task, split=split)
+        except Exception:
+            raise bare_error
     if limit > 0:
         raw = raw.select(range(min(limit, len(raw))))
     field_a, field_b = GLUE_FIELDS[task]

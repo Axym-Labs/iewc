@@ -10,6 +10,8 @@ from torch import nn
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 import timm
+from PIL import Image
+import yaml
 
 from .diagonal_regularization import (
     DiagonalImportance,
@@ -72,6 +74,22 @@ class LoRALinear(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         update = (x @ self.lora_a.t()) @ self.lora_b.t()
         return self.base(x) + update * self.scaling
+
+
+class ImagePathLabelDataset(torch.utils.data.Dataset):
+    def __init__(self, paths: list[Path], targets: list[int], transform=None):
+        self.paths = paths
+        self.targets = targets
+        self.transform = transform
+
+    def __len__(self) -> int:
+        return len(self.targets)
+
+    def __getitem__(self, idx: int):
+        image = Image.open(self.paths[idx]).convert("RGB")
+        if self.transform is not None:
+            image = self.transform(image)
+        return image, int(self.targets[idx])
 
 
 def _set_child(module: nn.Module, name: str, child: nn.Module) -> None:
@@ -151,6 +169,27 @@ def _download_imagenet_r(root: Path) -> None:
     archive.unlink()
 
 
+def _imagenet_r_split(data_root: Path, split: str, transform) -> ImagePathLabelDataset:
+    yaml_path = (
+        Path(__file__).resolve().parents[1]
+        / "vendor"
+        / "mammoth"
+        / "datasets"
+        / "imagenet_r_utils"
+        / f"imagenet-r_{split}.yaml"
+    )
+    config = yaml.safe_load(yaml_path.read_text())
+    paths = []
+    for raw_path in config["data"]:
+        path = Path(raw_path)
+        if path.parts and path.parts[0] == "data":
+            path = data_root.joinpath(*path.parts[1:])
+        elif not path.is_absolute():
+            path = data_root / path
+        paths.append(path)
+    return ImagePathLabelDataset(paths, [int(value) for value in config["targets"]], transform=transform)
+
+
 def _load_base_datasets(config: VisionCLConfig):
     data_root = Path(config.data_root)
     train_transform, test_transform = _vision_transforms(config.image_size)
@@ -169,10 +208,9 @@ def _load_base_datasets(config: VisionCLConfig):
         root = data_root
         if config.download:
             _download_imagenet_r(root)
-        image_root = root / "imagenet-r"
-        full = datasets.ImageFolder(image_root, transform=train_transform)
-        test_full = datasets.ImageFolder(image_root, transform=test_transform)
-        return full, test_full, len(full.classes)
+        train = _imagenet_r_split(root, "train", train_transform)
+        test = _imagenet_r_split(root, "test", test_transform)
+        return train, test, 200
     raise ValueError(f"Unknown vision dataset: {config.dataset}")
 
 
