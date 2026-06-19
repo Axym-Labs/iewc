@@ -22,6 +22,7 @@ from .diagonal_regularization import (
 
 VisionDataset = Literal["cifar100", "tiny_imagenet", "imagenet_r"]
 VisionAdaptation = Literal["full", "lora"]
+VisionEvaluation = Literal["task_aware", "class_incremental"]
 VisionMethod = Literal[
     "sequential",
     "ef",
@@ -57,6 +58,7 @@ class VisionCLConfig:
     num_workers: int = 2
     device: str = "cuda"
     download: bool = False
+    evaluation: VisionEvaluation = "task_aware"
 
 
 class LoRALinear(nn.Module):
@@ -314,13 +316,27 @@ def train_one_task(
 
 
 @torch.no_grad()
-def evaluate(model: nn.Module, loader: DataLoader, device: torch.device) -> float:
+def evaluate(
+    model: nn.Module,
+    loader: DataLoader,
+    device: torch.device,
+    *,
+    allowed_classes: list[int] | None = None,
+) -> float:
     model.eval()
+    mask = None
     correct = 0
     total = 0
     for batch in loader:
         x, y = batch[0].to(device), batch[1].to(device)
-        pred = model(x).argmax(dim=-1)
+        logits = model(x)
+        if allowed_classes is not None and mask is None:
+            allowed = torch.as_tensor(allowed_classes, device=device, dtype=torch.long)
+            mask = torch.full((logits.shape[-1],), float("-inf"), device=device)
+            mask[allowed] = 0.0
+        if mask is not None:
+            logits = logits + mask
+        pred = logits.argmax(dim=-1)
         correct += int((pred == y).sum().item())
         total += int(y.numel())
     return correct / float(max(1, total))
@@ -392,7 +408,7 @@ def run_vision_cl(config: VisionCLConfig, method: VisionMethod) -> dict:
         )
         train_losses.append(train_loss)
         row = []
-        for _, _, test_subset in tasks:
+        for eval_classes, _, test_subset in tasks:
             row.append(
                 evaluate(
                     model,
@@ -403,6 +419,7 @@ def run_vision_cl(config: VisionCLConfig, method: VisionMethod) -> dict:
                         workers=config.num_workers,
                     ),
                     device,
+                    allowed_classes=eval_classes if config.evaluation == "task_aware" else None,
                 )
             )
         accuracy_matrix.append(row)

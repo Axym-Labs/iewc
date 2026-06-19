@@ -31,6 +31,7 @@ def main() -> None:
     parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="cuda")
     parser.add_argument("--download", action="store_true")
+    parser.add_argument("--evaluation", choices=["task_aware", "class_incremental"], default="task_aware")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -58,6 +59,7 @@ def main() -> None:
         num_workers=args.num_workers,
         device=args.device,
         download=args.download,
+        evaluation=args.evaluation,
     )
     result = run_vision_cl(config, args.method)
     args.output.parent.mkdir(parents=True, exist_ok=True)
