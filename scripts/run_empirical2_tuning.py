@@ -255,6 +255,19 @@ def make_config(args):
     raise ValueError(f"Unknown group: {args.group}")
 
 
+def parse_method_grids(items: list[str]) -> dict[str, list[float]]:
+    grids: dict[str, list[float]] = {}
+    for item in items:
+        if ":" not in item:
+            raise ValueError("--method-grid entries must look like method:1,3,10")
+        method, raw_values = item.split(":", 1)
+        values = [float(value) for value in raw_values.split(",") if value]
+        if not values:
+            raise ValueError(f"Empty lambda grid for method {method}")
+        grids[method] = values
+    return grids
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--group", choices=["vision", "nlp", "forecasting"], required=True)
@@ -264,6 +277,12 @@ def main() -> None:
     parser.add_argument("--final-seeds", type=int, nargs="*", default=[])
     parser.add_argument("--methods", nargs="*", default=None)
     parser.add_argument("--lambdas", type=float, nargs="+", default=[1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0])
+    parser.add_argument(
+        "--method-grid",
+        nargs="*",
+        default=[],
+        help="Optional method-specific grids like ef:1000,3000,9000 iewc:300,1000,3000.",
+    )
     parser.add_argument("--edge-factor", type=float, default=3.0)
     parser.add_argument("--max-edge-extensions", type=int, default=3)
     parser.add_argument("--force", action="store_true")
@@ -315,6 +334,7 @@ def main() -> None:
 
     config = make_config(args)
     methods = args.methods if args.methods is not None else METHODS[args.group]
+    method_grids = parse_method_grids(args.method_grid)
     output_dir = args.output_dir
     summary_path = output_dir / f"{args.group}-{args.tag}-tuning-summary.json"
 
@@ -338,7 +358,7 @@ def main() -> None:
                 config=config,
                 method=method,
                 seed=args.seed,
-                initial_lambdas=args.lambdas,
+                initial_lambdas=method_grids.get(method, args.lambdas),
                 edge_factor=args.edge_factor,
                 max_edge_extensions=args.max_edge_extensions,
                 tag=args.tag,
@@ -392,6 +412,7 @@ def main() -> None:
         "config": asdict(config),
         "objective": "max_final_avg_accuracy" if args.group in {"vision", "nlp"} else "min_final_avg_mse",
         "initial_lambdas": args.lambdas,
+        "method_grids": method_grids,
         "edge_factor": args.edge_factor,
         "max_edge_extensions": args.max_edge_extensions,
         "tune_seed": args.seed,
