@@ -54,17 +54,27 @@ def _softmax_hessian_trace(output: Tensor) -> Tensor:
     return (1.0 - probabilities.pow(2).sum(dim=-1)).squeeze(0).clamp_min(0.0)
 
 
-def _gss_residual_weights(rows: list[Tensor], *, max_basis: int = 64, eps: float = 1e-12) -> Tensor:
-    basis: list[Tensor] = []
+def _gss_residual_weights(
+    rows: list[Tensor],
+    *,
+    max_basis: int = 64,
+    eps: float = 1e-12,
+    device: torch.device | None = None,
+) -> Tensor:
+    work_device = device if device is not None else rows[0].device
+    matrix = torch.stack([row.detach().float() for row in rows]).to(work_device)
+    basis: Tensor | None = None
     weights = []
-    for row in rows:
-        residual = row.detach().float()
-        for vector in basis:
-            residual = residual - torch.dot(residual, vector) * vector
+    for row in matrix:
+        residual = row
+        if basis is not None:
+            coeffs = torch.mv(basis, residual)
+            residual = residual - torch.mv(basis.t(), coeffs)
         weight = residual.pow(2).sum()
-        weights.append(weight)
-        if weight.item() > eps and len(basis) < max_basis:
-            basis.append(residual / torch.sqrt(weight + eps))
+        weights.append(weight.detach().cpu())
+        if weight.item() > eps and (basis is None or basis.shape[0] < max_basis):
+            vector = (residual / torch.sqrt(weight + eps)).detach().unsqueeze(0)
+            basis = vector if basis is None else torch.cat([basis, vector], dim=0)
     return torch.stack(weights)
 
 
@@ -144,7 +154,7 @@ def compute_diagonal_importance(
         raise ValueError("Cannot compute importances from an empty dataloader")
 
     if sample_weighting == "gss_residual":
-        sample_weights = _gss_residual_weights(normalized_rows, max_basis=gss_max_basis)
+        sample_weights = _gss_residual_weights(normalized_rows, max_basis=gss_max_basis, device=device)
     else:
         sample_weights = torch.stack([weight.float() for weight in immediate_weights])
     if normalize_sample_weights:
