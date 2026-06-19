@@ -129,7 +129,7 @@ def _configure_lora(model: nn.Module, config: NLPCLConfig) -> None:
     )
     model = get_peft_model(model, lora_config)
     for name, param in model.named_parameters():
-        if any(token in name for token in ("classifier", "score")):
+        if any(token in name for token in ("classifier", "classification_head", "score")):
             param.requires_grad = True
     return model
 
