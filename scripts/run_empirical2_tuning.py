@@ -251,6 +251,7 @@ def make_config(args):
             dropout=args.dropout,
             num_workers=args.num_workers,
             device=args.device,
+            normalization=args.normalization,
         )
     raise ValueError(f"Unknown group: {args.group}")
 
@@ -317,6 +318,7 @@ def main() -> None:
     parser.add_argument("--n-layers", type=int, default=3)
     parser.add_argument("--dim-feedforward", type=int, default=256)
     parser.add_argument("--dropout", type=float, default=0.0)
+    parser.add_argument("--normalization", choices=["series", "context"], default="series")
 
     parser.add_argument("--epochs-per-task", type=int, default=3)
     parser.add_argument("--batch-size", type=int, default=64)

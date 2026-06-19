@@ -18,6 +18,7 @@ from .diagonal_regularization import (
 
 ForecastDataset = Literal["m4", "ett"]
 ForecastMethod = Literal["sequential", "ef", "iewc", "iewc_gss"]
+ForecastNormalization = Literal["series", "context"]
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,7 @@ class ForecastingConfig:
     dropout: float = 0.0
     num_workers: int = 0
     device: str = "cuda"
+    normalization: ForecastNormalization = "series"
 
 
 class ForecastWindowDataset(Dataset):
@@ -58,6 +60,7 @@ class ForecastWindowDataset(Dataset):
         eval_windows_per_series: int,
         seed: int,
         train: bool,
+        normalization: ForecastNormalization,
     ):
         self.samples: list[tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]] = []
         generator = torch.Generator().manual_seed(seed)
@@ -65,6 +68,8 @@ class ForecastWindowDataset(Dataset):
         for values in series:
             if values.numel() < needed + 1:
                 continue
+            series_loc = values.mean()
+            series_scale = values.std().clamp_min(1e-3)
             if train:
                 max_start = values.numel() - needed - horizon
                 if max_start <= 0:
@@ -95,8 +100,12 @@ class ForecastWindowDataset(Dataset):
             for start in starts:
                 context = values[start : start + context_length].float()
                 target = values[start + context_length : start + context_length + horizon].float()
-                loc = context.mean()
-                scale = context.std().clamp_min(1e-4)
+                if normalization == "context":
+                    loc = context.mean()
+                    scale = context.std().clamp_min(1e-3)
+                else:
+                    loc = series_loc
+                    scale = series_scale
                 self.samples.append(((context - loc) / scale, (target - loc) / scale, loc, scale))
 
     def __len__(self) -> int:
@@ -191,6 +200,7 @@ def _make_m4_tasks(config: ForecastingConfig):
             eval_windows_per_series=config.eval_windows_per_series,
             seed=config.seed + task_id * 13,
             train=True,
+            normalization=config.normalization,
         )
         test = ForecastWindowDataset(
             series,
@@ -200,6 +210,7 @@ def _make_m4_tasks(config: ForecastingConfig):
             eval_windows_per_series=config.eval_windows_per_series,
             seed=config.seed,
             train=False,
+            normalization=config.normalization,
         )
         tasks.append((frequency, train, test))
     return tasks
@@ -220,6 +231,7 @@ def _make_ett_tasks(config: ForecastingConfig):
             eval_windows_per_series=config.eval_windows_per_series,
             seed=config.seed + task_id * 13,
             train=True,
+            normalization=config.normalization,
         )
         test = ForecastWindowDataset(
             [values[test_start:]],
@@ -229,6 +241,7 @@ def _make_ett_tasks(config: ForecastingConfig):
             eval_windows_per_series=config.eval_windows_per_series,
             seed=config.seed,
             train=False,
+            normalization=config.normalization,
         )
         tasks.append((name, train, test))
     return tasks
