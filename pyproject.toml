@@ -5,8 +5,14 @@ description = "Empirical utilities for Improved Elastic Weight Consolidation exp
 requires-python = ">=3.12"
 dependencies = [
   "avalanche-lib>=0.6.0",
+  "accelerate",
+  "datasets",
   "diffusers>=0.38.0",
+  "pandas",
+  "peft",
+  "timm",
   "torch",
+  "transformers",
 ]
 
 [tool.setuptools.packages.find]

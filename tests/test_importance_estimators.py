@@ -162,9 +162,11 @@ class ImportanceEstimatorTests(unittest.TestCase):
             )
         )
 
-    def test_config_rejects_unsupported_weighting(self):
+    def test_config_accepts_explicit_weighting_modes_and_rejects_unknown(self):
+        for weighting in ("uniform", "gss_residual", "fromp_trace"):
+            IEWCConfig(lambda_=1.0, tau=0.0, sample_weighting=weighting).validate()
         config = IEWCConfig(lambda_=1.0, tau=0.0, sample_weighting="not_uniform")
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(ValueError):
             config.validate()
 
     def test_ief_can_use_wasserstein_output_metric_for_loss_scale(self):

@@ -3,7 +3,7 @@ from typing import Literal
 
 
 OutputGeometry = Literal["euclidean", "wasserstein_1d_cdf"]
-SampleWeighting = Literal["uniform"]
+SampleWeighting = Literal["uniform", "gss_residual", "fromp_trace"]
 
 
 @dataclass(frozen=True)
@@ -26,10 +26,8 @@ class IEWCConfig:
             raise ValueError("tau must be non-negative")
         if self.geometry not in {"euclidean", "wasserstein_1d_cdf"}:
             raise ValueError(f"Unknown IEWC geometry: {self.geometry}")
-        if self.sample_weighting != "uniform":
-            raise NotImplementedError(
-                "The maintained IEWC path currently supports h='uniform'."
-            )
+        if self.sample_weighting not in {"uniform", "gss_residual", "fromp_trace"}:
+            raise ValueError(f"Unknown IEWC sample weighting: {self.sample_weighting}")
 
     @property
     def output_metric(self) -> OutputGeometry:
