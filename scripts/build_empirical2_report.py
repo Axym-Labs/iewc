@@ -79,7 +79,7 @@ def plot_metric(results: list[dict], experiment: str, metric: str, ylabel: str, 
 def plot_forecast_rollouts(results: list[dict]) -> list[str]:
     outputs = []
     for result in results:
-        if result.get("experiment") != "empirical2_m4_forecasting_cl":
+        if result.get("experiment") not in {"empirical2_m4_forecasting_cl", "empirical2_forecasting_cl"}:
             continue
         method = result.get("method", "method")
         rollouts = result.get("rollouts", {})
@@ -215,6 +215,13 @@ def main() -> None:
             "final_avg_mse",
             "final avg. MSE",
             "forecast_final_avg_mse.png",
+        ),
+        "ETT Forecasting Final Average MSE": plot_metric(
+            results,
+            "empirical2_forecasting_cl",
+            "final_avg_mse",
+            "final avg. MSE",
+            "ett_forecast_final_avg_mse.png",
         ),
     }
     rollout_paths = plot_forecast_rollouts(results)

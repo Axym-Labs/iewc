@@ -9,7 +9,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-name", default="roberta-base")
     parser.add_argument("--tasks", nargs="+", default=["sst2", "mrpc", "rte"])
-    parser.add_argument("--method", choices=["sequential", "ef", "ewc_dr", "iewc"], required=True)
+    parser.add_argument(
+        "--method",
+        choices=["sequential", "ef", "ewc_dr", "iewc", "iewc_gss", "iewc_fromp"],
+        required=True,
+    )
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--max-train-samples", type=int, default=128)
     parser.add_argument("--max-eval-samples", type=int, default=128)

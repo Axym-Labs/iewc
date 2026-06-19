@@ -7,14 +7,16 @@ from iewc.empirical2_forecasting import ForecastingConfig, run_forecasting_cl
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", choices=["m4", "ett"], default="m4")
     parser.add_argument("--data-root", default="/home/davwis/main/data/m4/tsf")
     parser.add_argument("--frequencies", nargs="+", default=["hourly", "weekly", "daily"])
-    parser.add_argument("--method", choices=["sequential", "ef", "iewc"], required=True)
+    parser.add_argument("--method", choices=["sequential", "ef", "iewc", "iewc_gss"], required=True)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--context-length", type=int, default=48)
     parser.add_argument("--horizon", type=int, default=12)
     parser.add_argument("--max-series-per-task", type=int, default=64)
     parser.add_argument("--windows-per-series", type=int, default=4)
+    parser.add_argument("--eval-windows-per-series", type=int, default=1)
     parser.add_argument("--epochs-per-task", type=int, default=2)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
@@ -32,14 +34,19 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
+    data_root = args.data_root
+    if args.dataset == "ett" and data_root == "/home/davwis/main/data/m4/tsf":
+        data_root = "/home/davwis/main/data/ett"
     config = ForecastingConfig(
-        data_root=args.data_root,
+        dataset=args.dataset,
+        data_root=data_root,
         frequencies=tuple(args.frequencies),
         seed=args.seed,
         context_length=args.context_length,
         horizon=args.horizon,
         max_series_per_task=args.max_series_per_task,
         windows_per_series=args.windows_per_series,
+        eval_windows_per_series=args.eval_windows_per_series,
         epochs_per_task=args.epochs_per_task,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,

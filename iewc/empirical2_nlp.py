@@ -19,7 +19,14 @@ from .diagonal_regularization import (
 )
 
 
-NLPMethod = Literal["sequential", "ef", "ewc_dr", "iewc"]
+NLPMethod = Literal[
+    "sequential",
+    "ef",
+    "ewc_dr",
+    "iewc",
+    "iewc_gss",
+    "iewc_fromp",
+]
 NLPAdaptation = Literal["full", "lora"]
 
 
@@ -273,15 +280,19 @@ def evaluate(model: nn.Module, loader: DataLoader, device: torch.device) -> floa
     return correct / float(max(1, total))
 
 
-def _importance_kind(method: NLPMethod) -> str | None:
+def _importance_kind_and_weight(method: NLPMethod) -> tuple[str | None, str]:
     if method == "sequential":
-        return None
+        return None, "uniform"
     if method == "ef":
-        return "ef"
+        return "ef", "uniform"
     if method == "ewc_dr":
-        return "ewc_dr"
+        return "ewc_dr", "uniform"
     if method == "iewc":
-        return "iewc"
+        return "iewc", "uniform"
+    if method == "iewc_gss":
+        return "iewc", "gss_residual"
+    if method == "iewc_fromp":
+        return "iewc", "fromp_trace"
     raise ValueError(f"Unknown NLP method: {method}")
 
 
@@ -304,7 +315,7 @@ def run_nlp_cl(config: NLPCLConfig, method: NLPMethod) -> dict:
         weight_decay=config.weight_decay,
     )
     importances: list[DiagonalImportance] = []
-    importance_kind = _importance_kind(method)
+    importance_kind, sample_weighting = _importance_kind_and_weight(method)
     accuracy_matrix = []
     train_losses = []
     importance_summaries = []
@@ -353,6 +364,7 @@ def run_nlp_cl(config: NLPCLConfig, method: NLPMethod) -> dict:
                 device=device,
                 kind=importance_kind,
                 tau=config.tau,
+                sample_weighting=sample_weighting,
                 max_samples=config.importance_samples,
             )
             importances.append(importance)
@@ -362,6 +374,8 @@ def run_nlp_cl(config: NLPCLConfig, method: NLPMethod) -> dict:
                     "task_name": task_name,
                     "sample_count": importance.sample_count,
                     "mean_loss_scale": float(importance.loss_scales.float().mean().item()),
+                    "mean_sample_weight": float(importance.sample_weights.float().mean().item()),
+                    "max_sample_weight": float(importance.sample_weights.float().max().item()),
                     "mean_summand_trace": float(importance.stored_summand_traces.float().mean().item()),
                 }
             )

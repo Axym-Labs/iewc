@@ -1,7 +1,9 @@
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Literal
+import csv
 import math
+import urllib.request
 
 import torch
 from torch import nn
@@ -14,11 +16,13 @@ from .diagonal_regularization import (
 )
 
 
-ForecastMethod = Literal["sequential", "ef", "iewc"]
+ForecastDataset = Literal["m4", "ett"]
+ForecastMethod = Literal["sequential", "ef", "iewc", "iewc_gss"]
 
 
 @dataclass(frozen=True)
 class ForecastingConfig:
+    dataset: ForecastDataset = "m4"
     data_root: str = "/home/davwis/main/data/m4/tsf"
     frequencies: tuple[str, ...] = ("hourly", "weekly", "daily")
     seed: int = 0
@@ -26,6 +30,7 @@ class ForecastingConfig:
     horizon: int = 12
     max_series_per_task: int = 64
     windows_per_series: int = 4
+    eval_windows_per_series: int = 1
     epochs_per_task: int = 2
     batch_size: int = 32
     learning_rate: float = 1e-3
@@ -50,6 +55,7 @@ class ForecastWindowDataset(Dataset):
         context_length: int,
         horizon: int,
         windows_per_series: int,
+        eval_windows_per_series: int,
         seed: int,
         train: bool,
     ):
@@ -70,7 +76,22 @@ class ForecastWindowDataset(Dataset):
                     generator=generator,
                 ).tolist()
             else:
-                starts = [values.numel() - needed]
+                max_start = values.numel() - needed
+                if eval_windows_per_series <= 1:
+                    starts = [max_start]
+                else:
+                    start_min = max(0, max_start // 2)
+                    starts = (
+                        torch.linspace(
+                            start_min,
+                            max_start,
+                            steps=min(eval_windows_per_series, max_start - start_min + 1),
+                        )
+                        .round()
+                        .long()
+                        .unique()
+                        .tolist()
+                    )
             for start in starts:
                 context = values[start : start + context_length].float()
                 target = values[start + context_length : start + context_length + horizon].float()
@@ -139,7 +160,24 @@ def _read_tsf(path: Path, *, max_series: int) -> list[torch.Tensor]:
     return series
 
 
-def _make_tasks(config: ForecastingConfig):
+def _download_ett(root: Path, name: str) -> Path:
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / f"{name}.csv"
+    if path.exists():
+        return path
+    url = f"https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/{name}.csv"
+    urllib.request.urlretrieve(url, path)
+    return path
+
+
+def _read_ett(path: Path) -> torch.Tensor:
+    with path.open(newline="") as handle:
+        reader = csv.DictReader(handle)
+        values = [float(row["OT"]) for row in reader if row.get("OT") not in {None, ""}]
+    return torch.tensor(values, dtype=torch.float32)
+
+
+def _make_m4_tasks(config: ForecastingConfig):
     tasks = []
     root = Path(config.data_root)
     for task_id, frequency in enumerate(config.frequencies):
@@ -150,6 +188,7 @@ def _make_tasks(config: ForecastingConfig):
             context_length=config.context_length,
             horizon=config.horizon,
             windows_per_series=config.windows_per_series,
+            eval_windows_per_series=config.eval_windows_per_series,
             seed=config.seed + task_id * 13,
             train=True,
         )
@@ -158,11 +197,49 @@ def _make_tasks(config: ForecastingConfig):
             context_length=config.context_length,
             horizon=config.horizon,
             windows_per_series=1,
+            eval_windows_per_series=config.eval_windows_per_series,
             seed=config.seed,
             train=False,
         )
         tasks.append((frequency, train, test))
     return tasks
+
+
+def _make_ett_tasks(config: ForecastingConfig):
+    tasks = []
+    root = Path(config.data_root)
+    for task_id, name in enumerate(config.frequencies):
+        values = _read_ett(_download_ett(root, name))
+        train_end = int(values.numel() * 0.7)
+        test_start = int(values.numel() * 0.8)
+        train = ForecastWindowDataset(
+            [values[:train_end]],
+            context_length=config.context_length,
+            horizon=config.horizon,
+            windows_per_series=config.windows_per_series,
+            eval_windows_per_series=config.eval_windows_per_series,
+            seed=config.seed + task_id * 13,
+            train=True,
+        )
+        test = ForecastWindowDataset(
+            [values[test_start:]],
+            context_length=config.context_length,
+            horizon=config.horizon,
+            windows_per_series=1,
+            eval_windows_per_series=config.eval_windows_per_series,
+            seed=config.seed,
+            train=False,
+        )
+        tasks.append((name, train, test))
+    return tasks
+
+
+def _make_tasks(config: ForecastingConfig):
+    if config.dataset == "m4":
+        return _make_m4_tasks(config)
+    if config.dataset == "ett":
+        return _make_ett_tasks(config)
+    raise ValueError(f"Unknown forecasting dataset: {config.dataset}")
 
 
 def _loader(dataset: Dataset, *, batch_size: int, shuffle: bool, workers: int) -> DataLoader:
@@ -177,6 +254,18 @@ def _loss_output_fn(device: torch.device):
         return nn.functional.mse_loss(output, target), output
 
     return fn
+
+
+def _importance_kind_and_weight(method: ForecastMethod) -> tuple[str | None, str]:
+    if method == "sequential":
+        return None, "uniform"
+    if method == "ef":
+        return "ef", "uniform"
+    if method == "iewc":
+        return "iewc", "uniform"
+    if method == "iewc_gss":
+        return "iewc", "gss_residual"
+    raise ValueError(f"Unknown forecasting method: {method}")
 
 
 def train_one_task(
@@ -253,6 +342,7 @@ def run_forecasting_cl(config: ForecastingConfig, method: ForecastMethod) -> dic
         model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
     )
     importances: list[DiagonalImportance] = []
+    importance_kind, sample_weighting = _importance_kind_and_weight(method)
     mse_matrix: list[list[float]] = []
     mae_matrix: list[list[float]] = []
     train_losses = []
@@ -296,7 +386,7 @@ def run_forecasting_cl(config: ForecastingConfig, method: ForecastMethod) -> dic
         mse_matrix.append(mse_row)
         mae_matrix.append(mae_row)
 
-        if method != "sequential" and task_id < len(tasks) - 1:
+        if importance_kind is not None and task_id < len(tasks) - 1:
             importance = compute_diagonal_importance(
                 model=model,
                 dataloader=_loader(
@@ -307,8 +397,9 @@ def run_forecasting_cl(config: ForecastingConfig, method: ForecastMethod) -> dic
                 ),
                 loss_output_fn=_loss_output_fn(device),
                 device=device,
-                kind="ef" if method == "ef" else "iewc",
+                kind=importance_kind,
                 tau=config.tau,
+                sample_weighting=sample_weighting,
                 max_samples=config.importance_samples,
             )
             importances.append(importance)
@@ -318,6 +409,8 @@ def run_forecasting_cl(config: ForecastingConfig, method: ForecastMethod) -> dic
                     "frequency": frequency,
                     "sample_count": importance.sample_count,
                     "mean_loss_scale": float(importance.loss_scales.float().mean().item()),
+                    "mean_sample_weight": float(importance.sample_weights.float().mean().item()),
+                    "max_sample_weight": float(importance.sample_weights.float().max().item()),
                     "mean_summand_trace": float(importance.stored_summand_traces.float().mean().item()),
                 }
             )
@@ -328,7 +421,7 @@ def run_forecasting_cl(config: ForecastingConfig, method: ForecastMethod) -> dic
         best = min(row[task_id] for row in mse_matrix)
         forgetting.append(final_mses[task_id] - best)
     return {
-        "experiment": "empirical2_m4_forecasting_cl",
+        "experiment": "empirical2_forecasting_cl",
         "config": asdict(config),
         "method": method,
         "frequencies": list(config.frequencies),
