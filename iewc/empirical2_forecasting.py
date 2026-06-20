@@ -4,6 +4,7 @@ from typing import Literal
 import csv
 import math
 import urllib.request
+import zipfile
 
 import torch
 from torch import nn
@@ -16,9 +17,10 @@ from .diagonal_regularization import (
 )
 
 
-ForecastDataset = Literal["m4", "ett"]
+ForecastDataset = Literal["m4", "ett", "long_horizon"]
 ForecastMethod = Literal["sequential", "ef", "iewc", "iewc_gss"]
 ForecastNormalization = Literal["series", "context"]
+ForecastModel = Literal["encoder", "patchtst"]
 
 
 @dataclass(frozen=True)
@@ -39,10 +41,13 @@ class ForecastingConfig:
     ewc_lambda: float = 10.0
     tau: float = 1e-2
     importance_samples: int = 128
+    model_type: ForecastModel = "encoder"
     d_model: int = 64
     n_heads: int = 4
     n_layers: int = 2
     dim_feedforward: int = 128
+    patch_length: int = 16
+    patch_stride: int = 8
     dropout: float = 0.0
     num_workers: int = 0
     device: str = "cuda"
@@ -148,6 +153,53 @@ class TransformerForecaster(nn.Module):
         return self.head(encoded[:, -1])
 
 
+class PatchTSTForecaster(nn.Module):
+    """Channel-independent PatchTST-style forecaster for univariate windows."""
+
+    def __init__(
+        self,
+        *,
+        context_length: int,
+        horizon: int,
+        patch_length: int,
+        patch_stride: int,
+        d_model: int,
+        n_heads: int,
+        n_layers: int,
+        dim_feedforward: int,
+        dropout: float,
+    ):
+        super().__init__()
+        if patch_length > context_length:
+            raise ValueError("patch_length must be <= context_length")
+        self.patch_length = patch_length
+        self.patch_stride = patch_stride
+        n_patches = 1 + (context_length - patch_length) // patch_stride
+        self.patch_proj = nn.Linear(patch_length, d_model)
+        self.pos_embed = nn.Parameter(torch.zeros(1, n_patches, d_model))
+        layer = nn.TransformerEncoderLayer(
+            d_model=d_model,
+            nhead=n_heads,
+            dim_feedforward=dim_feedforward,
+            dropout=dropout,
+            batch_first=True,
+            activation="gelu",
+        )
+        self.encoder = nn.TransformerEncoder(layer, num_layers=n_layers)
+        self.head = nn.Sequential(
+            nn.Flatten(start_dim=1),
+            nn.LayerNorm(n_patches * d_model),
+            nn.Linear(n_patches * d_model, horizon),
+        )
+        nn.init.trunc_normal_(self.pos_embed, std=0.02)
+
+    def forward(self, context: torch.Tensor) -> torch.Tensor:
+        patches = context.unfold(dimension=1, size=self.patch_length, step=self.patch_stride)
+        x = self.patch_proj(patches) + self.pos_embed[:, : patches.shape[1]]
+        encoded = self.encoder(x)
+        return self.head(encoded)
+
+
 def _read_tsf(path: Path, *, max_series: int) -> list[torch.Tensor]:
     series = []
     in_data = False
@@ -184,6 +236,56 @@ def _read_ett(path: Path) -> torch.Tensor:
         reader = csv.DictReader(handle)
         values = [float(row["OT"]) for row in reader if row.get("OT") not in {None, ""}]
     return torch.tensor(values, dtype=torch.float32)
+
+
+def _download_long_horizon(root: Path) -> Path:
+    root.mkdir(parents=True, exist_ok=True)
+    raw = root / "raw"
+    raw.mkdir(parents=True, exist_ok=True)
+    path = raw / "datasets.zip"
+    if path.exists() and path.stat().st_size > 300_000_000:
+        return path
+    url = "https://nhits-experiments.s3.amazonaws.com/datasets.zip"
+    urllib.request.urlretrieve(url, path)
+    return path
+
+
+def _read_long_horizon_group(root: Path, group: str, *, max_series: int) -> list[torch.Tensor]:
+    cache = root / "cache"
+    cache.mkdir(parents=True, exist_ok=True)
+    group_key = group.lower()
+    cache_path = cache / f"{group_key}_m.pt"
+    if cache_path.exists():
+        series = torch.load(cache_path, weights_only=True)
+    else:
+        import pandas as pd
+
+        zip_path = _download_long_horizon(root)
+        candidates = {
+            "ecl": "ECL/M/df_y.csv",
+            "electricity": "ECL/M/df_y.csv",
+            "traffic": "traffic/M/df_y.csv",
+            "weather": "weather/M/df_y.csv",
+            "exchange": "Exchange/M/df_y.csv",
+            "ili": "ili/M/df_y.csv",
+            "etth1": "ETTh1/df_y.csv",
+            "etth2": "ETTh2/df_y.csv",
+            "ettm1": "ETTm1/M/df_y.csv",
+            "ettm2": "ETTm2/M/df_y.csv",
+        }
+        if group_key not in candidates:
+            raise ValueError(f"Unknown long-horizon group: {group}")
+        with zipfile.ZipFile(zip_path) as archive:
+            with archive.open(candidates[group_key]) as handle:
+                frame = pd.read_csv(handle, usecols=["unique_id", "y"])
+        series = [
+            torch.tensor(values["y"].to_numpy(dtype="float32"), dtype=torch.float32)
+            for _, values in frame.groupby("unique_id", sort=False)
+        ]
+        torch.save(series, cache_path)
+    if max_series > 0:
+        return series[:max_series]
+    return series
 
 
 def _make_m4_tasks(config: ForecastingConfig):
@@ -247,12 +349,76 @@ def _make_ett_tasks(config: ForecastingConfig):
     return tasks
 
 
+def _make_long_horizon_tasks(config: ForecastingConfig):
+    tasks = []
+    root = Path(config.data_root)
+    for task_id, name in enumerate(config.frequencies):
+        series = _read_long_horizon_group(root, name, max_series=config.max_series_per_task)
+        train_series = []
+        test_series = []
+        for values in series:
+            train_end = int(values.numel() * 0.7)
+            test_start = int(values.numel() * 0.8)
+            train_series.append(values[:train_end])
+            test_series.append(values[test_start:])
+        train = ForecastWindowDataset(
+            train_series,
+            context_length=config.context_length,
+            horizon=config.horizon,
+            windows_per_series=config.windows_per_series,
+            eval_windows_per_series=config.eval_windows_per_series,
+            seed=config.seed + task_id * 13,
+            train=True,
+            normalization=config.normalization,
+        )
+        test = ForecastWindowDataset(
+            test_series,
+            context_length=config.context_length,
+            horizon=config.horizon,
+            windows_per_series=1,
+            eval_windows_per_series=config.eval_windows_per_series,
+            seed=config.seed,
+            train=False,
+            normalization=config.normalization,
+        )
+        tasks.append((name, train, test))
+    return tasks
+
+
 def _make_tasks(config: ForecastingConfig):
     if config.dataset == "m4":
         return _make_m4_tasks(config)
     if config.dataset == "ett":
         return _make_ett_tasks(config)
+    if config.dataset == "long_horizon":
+        return _make_long_horizon_tasks(config)
     raise ValueError(f"Unknown forecasting dataset: {config.dataset}")
+
+
+def _make_model(config: ForecastingConfig) -> nn.Module:
+    if config.model_type == "encoder":
+        return TransformerForecaster(
+            context_length=config.context_length,
+            horizon=config.horizon,
+            d_model=config.d_model,
+            n_heads=config.n_heads,
+            n_layers=config.n_layers,
+            dim_feedforward=config.dim_feedforward,
+            dropout=config.dropout,
+        )
+    if config.model_type == "patchtst":
+        return PatchTSTForecaster(
+            context_length=config.context_length,
+            horizon=config.horizon,
+            patch_length=config.patch_length,
+            patch_stride=config.patch_stride,
+            d_model=config.d_model,
+            n_heads=config.n_heads,
+            n_layers=config.n_layers,
+            dim_feedforward=config.dim_feedforward,
+            dropout=config.dropout,
+        )
+    raise ValueError(f"Unknown forecasting model_type: {config.model_type}")
 
 
 def _loader(dataset: Dataset, *, batch_size: int, shuffle: bool, workers: int) -> DataLoader:
@@ -342,15 +508,7 @@ def run_forecasting_cl(config: ForecastingConfig, method: ForecastMethod) -> dic
         raise RuntimeError("CUDA was requested but is not available")
 
     tasks = _make_tasks(config)
-    model = TransformerForecaster(
-        context_length=config.context_length,
-        horizon=config.horizon,
-        d_model=config.d_model,
-        n_heads=config.n_heads,
-        n_layers=config.n_layers,
-        dim_feedforward=config.dim_feedforward,
-        dropout=config.dropout,
-    ).to(device)
+    model = _make_model(config).to(device)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
     )

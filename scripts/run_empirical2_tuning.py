@@ -222,11 +222,11 @@ def make_config(args):
     if args.group == "forecasting":
         data_root = args.data_root
         if data_root == "/home/davwis/main/data":
-            data_root = (
-                "/home/davwis/main/data/ett"
-                if args.forecast_dataset == "ett"
-                else "/home/davwis/main/data/m4/tsf"
-            )
+            data_root = {
+                "ett": "/home/davwis/main/data/ett",
+                "long_horizon": "/home/davwis/main/data/long_horizon",
+                "m4": "/home/davwis/main/data/m4/tsf",
+            }[args.forecast_dataset]
         return ForecastingConfig(
             dataset=args.forecast_dataset,
             data_root=data_root,
@@ -244,10 +244,13 @@ def make_config(args):
             ewc_lambda=args.ewc_lambda,
             tau=args.tau,
             importance_samples=args.importance_samples,
+            model_type=args.model_type,
             d_model=args.d_model,
             n_heads=args.n_heads,
             n_layers=args.n_layers,
             dim_feedforward=args.dim_feedforward,
+            patch_length=args.patch_length,
+            patch_stride=args.patch_stride,
             dropout=args.dropout,
             num_workers=args.num_workers,
             device=args.device,
@@ -289,7 +292,7 @@ def main() -> None:
     parser.add_argument("--force", action="store_true")
 
     parser.add_argument("--dataset", choices=["cifar100", "tiny_imagenet", "imagenet_r"], default="imagenet_r")
-    parser.add_argument("--forecast-dataset", choices=["m4", "ett"], default="ett")
+    parser.add_argument("--forecast-dataset", choices=["m4", "ett", "long_horizon"], default="ett")
     parser.add_argument("--data-root", default="/home/davwis/main/data")
     parser.add_argument("--model-name", default="vit_base_patch16_224")
     parser.add_argument("--pretrained", action="store_true")
@@ -313,10 +316,13 @@ def main() -> None:
     parser.add_argument("--max-series-per-task", type=int, default=64)
     parser.add_argument("--windows-per-series", type=int, default=512)
     parser.add_argument("--eval-windows-per-series", type=int, default=128)
+    parser.add_argument("--model-type", choices=["encoder", "patchtst"], default="encoder")
     parser.add_argument("--d-model", type=int, default=128)
     parser.add_argument("--n-heads", type=int, default=4)
     parser.add_argument("--n-layers", type=int, default=3)
     parser.add_argument("--dim-feedforward", type=int, default=256)
+    parser.add_argument("--patch-length", type=int, default=16)
+    parser.add_argument("--patch-stride", type=int, default=8)
     parser.add_argument("--dropout", type=float, default=0.0)
     parser.add_argument("--normalization", choices=["series", "context"], default="series")
 
