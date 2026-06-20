@@ -7,7 +7,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "docs" / "empirical-2" / "artifacts"
-RAW_LEDGER = ROOT / "docs" / "run_tables.md"
+RAW_LEDGER = ROOT / "docs" / "empirical-2" / "run_tables.md"
 RESULT_TABLES = ARTIFACTS / "result-tables.md"
 
 
@@ -333,7 +333,7 @@ def build_selected_tables() -> None:
     lines = [
         "# Empirical-2 Selected Result Tables",
         "",
-        "These tables summarize selected/tuned run families. The tracked per-training-run ledger is `docs/run_tables.md`.",
+        "These tables summarize selected/tuned run families. The tracked per-training-run ledger is `docs/empirical-2/run_tables.md`.",
         "",
     ]
     lines.extend(selected_sections(summaries, "vision", "Vision Classification"))

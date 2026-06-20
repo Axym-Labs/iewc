@@ -272,6 +272,50 @@ def parse_method_grids(items: list[str]) -> dict[str, list[float]]:
     return grids
 
 
+def centered_lambda_grid(center: float, factor: float) -> list[float]:
+    if not math.isfinite(center) or center <= 0:
+        raise ValueError("--lambda-center and --method-center values must be positive finite numbers")
+    if not math.isfinite(factor) or factor <= 1:
+        raise ValueError("--edge-factor must be > 1 when constructing centered lambda grids")
+    return sorted(
+        {
+            float(center) / (factor**2),
+            float(center) / factor,
+            float(center),
+            float(center) * factor,
+            float(center) * (factor**2),
+        }
+    )
+
+
+def parse_method_centers(items: list[str]) -> dict[str, float]:
+    centers: dict[str, float] = {}
+    for item in items:
+        if ":" not in item:
+            raise ValueError("--method-center entries must look like method:100")
+        method, raw_value = item.split(":", 1)
+        centers[method] = float(raw_value)
+    return centers
+
+
+def initial_lambdas_for_method(
+    *,
+    method: str,
+    method_grids: dict[str, list[float]],
+    method_centers: dict[str, float],
+    lambda_center: float | None,
+    default_lambdas: list[float],
+    edge_factor: float,
+) -> list[float]:
+    if method in method_grids:
+        return method_grids[method]
+    if method in method_centers:
+        return centered_lambda_grid(method_centers[method], edge_factor)
+    if lambda_center is not None:
+        return centered_lambda_grid(lambda_center, edge_factor)
+    return default_lambdas
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--group", choices=["vision", "nlp", "forecasting"], required=True)
@@ -286,6 +330,18 @@ def main() -> None:
         nargs="*",
         default=[],
         help="Optional method-specific grids like ef:1000,3000,9000 iewc:300,1000,3000.",
+    )
+    parser.add_argument(
+        "--lambda-center",
+        type=float,
+        default=None,
+        help="Optional center for an automatic five-point lambda grid: c/f^2,c/f,c,c*f,c*f^2.",
+    )
+    parser.add_argument(
+        "--method-center",
+        nargs="*",
+        default=[],
+        help="Optional method-specific automatic grid centers like ef:1000 iewc:300.",
     )
     parser.add_argument("--edge-factor", type=float, default=3.0)
     parser.add_argument("--max-edge-extensions", type=int, default=3)
@@ -343,6 +399,7 @@ def main() -> None:
     config = make_config(args)
     methods = args.methods if args.methods is not None else METHODS[args.group]
     method_grids = parse_method_grids(args.method_grid)
+    method_centers = parse_method_centers(args.method_center)
     output_dir = args.output_dir
     summary_path = output_dir / f"{args.group}-{args.tag}-tuning-summary.json"
 
@@ -366,7 +423,14 @@ def main() -> None:
                 config=config,
                 method=method,
                 seed=args.seed,
-                initial_lambdas=method_grids.get(method, args.lambdas),
+                initial_lambdas=initial_lambdas_for_method(
+                    method=method,
+                    method_grids=method_grids,
+                    method_centers=method_centers,
+                    lambda_center=args.lambda_center,
+                    default_lambdas=args.lambdas,
+                    edge_factor=args.edge_factor,
+                ),
                 edge_factor=args.edge_factor,
                 max_edge_extensions=args.max_edge_extensions,
                 tag=args.tag,
@@ -421,6 +485,9 @@ def main() -> None:
         "objective": "max_final_avg_accuracy" if args.group in {"vision", "nlp"} else "min_final_avg_mse",
         "initial_lambdas": args.lambdas,
         "method_grids": method_grids,
+        "lambda_center": args.lambda_center,
+        "method_centers": method_centers,
+        "centered_grid_rule": "center/edge_factor^2, center/edge_factor, center, center*edge_factor, center*edge_factor^2",
         "edge_factor": args.edge_factor,
         "max_edge_extensions": args.max_edge_extensions,
         "tune_seed": args.seed,
