@@ -34,7 +34,7 @@ def main() -> None:
     parser.add_argument("--dropout", type=float, default=0.0)
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="cuda")
-    parser.add_argument("--normalization", choices=["series", "context"], default="series")
+    parser.add_argument("--normalization", choices=["series", "context", "task"], default="series")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 

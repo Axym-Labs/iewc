@@ -10,6 +10,7 @@ import torch
 
 from iewc.empirical2_forecasting import ForecastingConfig, run_forecasting_cl
 from iewc.empirical2_nlp import NLPCLConfig, run_nlp_cl
+from iewc.empirical2_trace import TraceCLConfig, run_trace_cl
 from iewc.empirical2_vision import VisionCLConfig, run_vision_cl
 
 
@@ -20,6 +21,7 @@ METHODS = {
     "vision": ["ef", "ewc_dr", "iewc", "iewc_gss", "iewc_fromp"],
     "nlp": ["ef", "ewc_dr", "iewc", "iewc_gss", "iewc_fromp"],
     "forecasting": ["ef", "iewc", "iewc_gss"],
+    "trace": ["ef", "ewc_dr", "iewc", "iewc_gss"],
 }
 
 
@@ -32,13 +34,15 @@ def lambda_slug(value: float | None) -> str:
 def metric(result: dict[str, Any], group: str) -> float:
     if group in {"vision", "nlp"}:
         return float(result["final_avg_accuracy"])
+    if group == "trace":
+        return float(result["final_avg_score"])
     return float(result["final_avg_mse"])
 
 
 def is_better(candidate: float, incumbent: float | None, group: str) -> bool:
     if incumbent is None:
         return True
-    if group in {"vision", "nlp"}:
+    if group in {"vision", "nlp", "trace"}:
         return candidate > incumbent
     return candidate < incumbent
 
@@ -83,6 +87,8 @@ def run_once(
         result = run_nlp_cl(run_config, method)
     elif group == "forecasting":
         result = run_forecasting_cl(run_config, method)
+    elif group == "trace":
+        result = run_trace_cl(run_config, method)
     else:
         raise ValueError(f"Unknown group: {group}")
     write_json(path, result)
@@ -256,6 +262,35 @@ def make_config(args):
             device=args.device,
             normalization=args.normalization,
         )
+    if args.group == "trace":
+        data_root = args.data_root
+        if data_root == "/home/davwis/main/data":
+            data_root = f"/home/davwis/main/data/trace/TRACE-Benchmark/LLM-CL-Benchmark_{args.trace_size}"
+        return TraceCLConfig(
+            data_root=data_root,
+            model_name=args.model_name,
+            tasks=tuple(args.tasks),
+            seed=args.seed,
+            max_train_samples=args.max_train_samples,
+            max_eval_samples=args.max_eval_samples,
+            epochs_per_task=args.epochs_per_task,
+            batch_size=args.batch_size,
+            gradient_accumulation_steps=args.gradient_accumulation_steps,
+            learning_rate=args.learning_rate,
+            weight_decay=args.weight_decay,
+            ewc_lambda=args.ewc_lambda,
+            tau=args.tau,
+            importance_samples=args.importance_samples,
+            max_prompt_length=args.max_prompt_length,
+            max_answer_length=args.max_answer_length,
+            generation_max_new_tokens=args.generation_max_new_tokens,
+            answer_mode=args.answer_mode,
+            lora_rank=args.lora_rank,
+            lora_alpha=args.lora_alpha,
+            lora_dropout=args.lora_dropout,
+            dtype=args.dtype,
+            device=args.device,
+        )
     raise ValueError(f"Unknown group: {args.group}")
 
 
@@ -318,7 +353,7 @@ def initial_lambdas_for_method(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--group", choices=["vision", "nlp", "forecasting"], required=True)
+    parser.add_argument("--group", choices=["vision", "nlp", "forecasting", "trace"], required=True)
     parser.add_argument("--tag", required=True)
     parser.add_argument("--output-dir", type=Path, default=ARTIFACTS)
     parser.add_argument("--seed", type=int, default=0)
@@ -366,6 +401,14 @@ def main() -> None:
     parser.add_argument("--max-train-samples", type=int, default=1024)
     parser.add_argument("--max-eval-samples", type=int, default=512)
     parser.add_argument("--max-length", type=int, default=128)
+    parser.add_argument("--trace-size", type=int, default=500)
+    parser.add_argument("--max-prompt-length", type=int, default=256)
+    parser.add_argument("--max-answer-length", type=int, default=32)
+    parser.add_argument("--generation-max-new-tokens", type=int, default=24)
+    parser.add_argument("--answer-mode", choices=["full", "choice"], default="full")
+    parser.add_argument("--gradient-accumulation-steps", type=int, default=8)
+    parser.add_argument("--lora-dropout", type=float, default=0.0)
+    parser.add_argument("--dtype", choices=["auto", "float32", "bfloat16", "float16"], default="auto")
 
     parser.add_argument("--context-length", type=int, default=96)
     parser.add_argument("--horizon", type=int, default=24)
@@ -380,7 +423,7 @@ def main() -> None:
     parser.add_argument("--patch-length", type=int, default=16)
     parser.add_argument("--patch-stride", type=int, default=8)
     parser.add_argument("--dropout", type=float, default=0.0)
-    parser.add_argument("--normalization", choices=["series", "context"], default="series")
+    parser.add_argument("--normalization", choices=["series", "context", "task"], default="series")
 
     parser.add_argument("--epochs-per-task", type=int, default=3)
     parser.add_argument("--batch-size", type=int, default=64)
@@ -482,7 +525,9 @@ def main() -> None:
         "group": args.group,
         "tag": args.tag,
         "config": asdict(config),
-        "objective": "max_final_avg_accuracy" if args.group in {"vision", "nlp"} else "min_final_avg_mse",
+        "objective": "max_final_avg_accuracy"
+        if args.group in {"vision", "nlp"}
+        else ("max_final_avg_score" if args.group == "trace" else "min_final_avg_mse"),
         "initial_lambdas": args.lambdas,
         "method_grids": method_grids,
         "lambda_center": args.lambda_center,

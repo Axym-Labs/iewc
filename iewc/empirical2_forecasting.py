@@ -19,7 +19,7 @@ from .diagonal_regularization import (
 
 ForecastDataset = Literal["m4", "ett", "long_horizon"]
 ForecastMethod = Literal["sequential", "ef", "iewc", "iewc_gss"]
-ForecastNormalization = Literal["series", "context"]
+ForecastNormalization = Literal["series", "context", "task"]
 ForecastModel = Literal["encoder", "patchtst"]
 
 
@@ -66,10 +66,16 @@ class ForecastWindowDataset(Dataset):
         seed: int,
         train: bool,
         normalization: ForecastNormalization,
+        task_loc: torch.Tensor | None = None,
+        task_scale: torch.Tensor | None = None,
     ):
         self.samples: list[tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]] = []
         generator = torch.Generator().manual_seed(seed)
         needed = context_length + horizon
+        if normalization == "task" and (task_loc is None or task_scale is None):
+            values = torch.cat([item.float().reshape(-1) for item in series])
+            task_loc = values.mean()
+            task_scale = values.std().clamp_min(1e-3)
         for values in series:
             if values.numel() < needed + 1:
                 continue
@@ -108,6 +114,9 @@ class ForecastWindowDataset(Dataset):
                 if normalization == "context":
                     loc = context.mean()
                     scale = context.std().clamp_min(1e-3)
+                elif normalization == "task":
+                    loc = task_loc
+                    scale = task_scale
                 else:
                     loc = series_loc
                     scale = series_scale
@@ -294,6 +303,9 @@ def _make_m4_tasks(config: ForecastingConfig):
     for task_id, frequency in enumerate(config.frequencies):
         path = root / f"m4_{frequency}_dataset.tsf"
         series = _read_tsf(path, max_series=config.max_series_per_task)
+        task_values = torch.cat([values.float().reshape(-1) for values in series])
+        task_loc = task_values.mean()
+        task_scale = task_values.std().clamp_min(1e-3)
         train = ForecastWindowDataset(
             series,
             context_length=config.context_length,
@@ -303,6 +315,8 @@ def _make_m4_tasks(config: ForecastingConfig):
             seed=config.seed + task_id * 13,
             train=True,
             normalization=config.normalization,
+            task_loc=task_loc,
+            task_scale=task_scale,
         )
         test = ForecastWindowDataset(
             series,
@@ -313,6 +327,8 @@ def _make_m4_tasks(config: ForecastingConfig):
             seed=config.seed,
             train=False,
             normalization=config.normalization,
+            task_loc=task_loc,
+            task_scale=task_scale,
         )
         tasks.append((frequency, train, test))
     return tasks
@@ -325,6 +341,8 @@ def _make_ett_tasks(config: ForecastingConfig):
         values = _read_ett(_download_ett(root, name))
         train_end = int(values.numel() * 0.7)
         test_start = int(values.numel() * 0.8)
+        task_loc = values[:train_end].mean()
+        task_scale = values[:train_end].std().clamp_min(1e-3)
         train = ForecastWindowDataset(
             [values[:train_end]],
             context_length=config.context_length,
@@ -334,6 +352,8 @@ def _make_ett_tasks(config: ForecastingConfig):
             seed=config.seed + task_id * 13,
             train=True,
             normalization=config.normalization,
+            task_loc=task_loc,
+            task_scale=task_scale,
         )
         test = ForecastWindowDataset(
             [values[test_start:]],
@@ -344,6 +364,8 @@ def _make_ett_tasks(config: ForecastingConfig):
             seed=config.seed,
             train=False,
             normalization=config.normalization,
+            task_loc=task_loc,
+            task_scale=task_scale,
         )
         tasks.append((name, train, test))
     return tasks
@@ -361,6 +383,9 @@ def _make_long_horizon_tasks(config: ForecastingConfig):
             test_start = int(values.numel() * 0.8)
             train_series.append(values[:train_end])
             test_series.append(values[test_start:])
+        task_values = torch.cat([values.float().reshape(-1) for values in train_series])
+        task_loc = task_values.mean()
+        task_scale = task_values.std().clamp_min(1e-3)
         train = ForecastWindowDataset(
             train_series,
             context_length=config.context_length,
@@ -370,6 +395,8 @@ def _make_long_horizon_tasks(config: ForecastingConfig):
             seed=config.seed + task_id * 13,
             train=True,
             normalization=config.normalization,
+            task_loc=task_loc,
+            task_scale=task_scale,
         )
         test = ForecastWindowDataset(
             test_series,
@@ -380,6 +407,8 @@ def _make_long_horizon_tasks(config: ForecastingConfig):
             seed=config.seed,
             train=False,
             normalization=config.normalization,
+            task_loc=task_loc,
+            task_scale=task_scale,
         )
         tasks.append((name, train, test))
     return tasks

@@ -2,7 +2,7 @@
 
 This tracked ledger records every individual empirical-2 training-run JSON currently present in `docs/empirical-2/artifacts/`, excluding only `*-tuning-summary.json` files because those summarize multiple runs rather than train a model. Raw artifacts and plots are ignored, but this per-run index is committed for auditability.
 
-Total logged training runs: `330`.
+Total logged training runs: `505`.
 
 ## Vision Classification
 
@@ -153,7 +153,7 @@ Total runs: `140`.
 
 ## Time-Series Forecasting / Regression
 
-Total runs: `91`.
+Total runs: `142`.
 
 | artifact | method | seed | lambda | dataset | distributions | model | context->horizon | windows | epochs | normalization | final avg MSE | forgetting MSE |
 | --- | --- | ---: | ---: | --- | --- | --- | --- | --- | ---: | --- | ---: | ---: |
@@ -230,6 +230,57 @@ Total runs: `91`.
 | `forecasting-longhorizon-patchtst-3task-scaled-sequential-seed0.json` | Sequential | 0 | - | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 8 | series | 0.3211 | 0.0135 |
 | `forecasting-longhorizon-patchtst-3task-scaled-sequential-seed1.json` | Sequential | 1 | - | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 8 | series | 0.3402 | 0.0361 |
 | `forecasting-longhorizon-patchtst-3task-scaled-sequential-seed2.json` | Sequential | 2 | - | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 8 | series | 0.3421 | 0.0348 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed0-lam0p333333.json` | EF-EWC | 0 | 0.3333 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2692 | 0.0464 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed0-lam1.json` | EF-EWC | 0 | 1 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2691 | 0.0462 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed0-lam243.json` | EF-EWC | 0 | 243 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2418 | 0.0151 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed0-lam27.json` | EF-EWC | 0 | 27 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2649 | 0.0413 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed0-lam3.json` | EF-EWC | 0 | 3 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2687 | 0.0457 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed0-lam729.json` | EF-EWC | 0 | 729 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2383 | 0.0119 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed0-lam81.json` | EF-EWC | 0 | 81 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2594 | 0.0353 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed0-lam9.json` | EF-EWC | 0 | 9 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2675 | 0.0442 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed1-lam729.json` | EF-EWC | 1 | 729 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2369 | 0.0142 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-ef-seed2-lam729.json` | EF-EWC | 2 | 729 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.241 | 0.0158 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc-seed0-lam0p333333.json` | IEWC | 0 | 0.3333 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.267 | 0.0437 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc-seed0-lam1.json` | IEWC | 0 | 1 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2644 | 0.0406 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc-seed0-lam27.json` | IEWC | 0 | 27 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2409 | 0.0126 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc-seed0-lam3.json` | IEWC | 0 | 3 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2576 | 0.0331 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc-seed0-lam9.json` | IEWC | 0 | 9 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2408 | 0.0148 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc-seed1-lam9.json` | IEWC | 1 | 9 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.246 | 0.024 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc-seed2-lam9.json` | IEWC | 2 | 9 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2386 | 0.0185 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc_gss-seed0-lam0p333333.json` | IEWC-GSS | 0 | 0.3333 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2646 | 0.041 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc_gss-seed0-lam1.json` | IEWC-GSS | 0 | 1 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2596 | 0.0355 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc_gss-seed0-lam27.json` | IEWC-GSS | 0 | 27 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2391 | 0.01 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc_gss-seed0-lam3.json` | IEWC-GSS | 0 | 3 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2454 | 0.019 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc_gss-seed0-lam9.json` | IEWC-GSS | 0 | 9 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2375 | 0.0123 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc_gss-seed1-lam9.json` | IEWC-GSS | 1 | 9 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.239 | 0.0158 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-iewc_gss-seed2-lam9.json` | IEWC-GSS | 2 | 9 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2384 | 0.0161 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-sequential-seed0.json` | Sequential | 0 | - | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2751 | 0.0498 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-sequential-seed1.json` | Sequential | 1 | - | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2787 | 0.0628 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fit-sequential-seed2.json` | Sequential | 2 | - | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2661 | 0.0479 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-fitguard-sequential-seed0.json` | Sequential | 0 | - | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=32, eval=8 | 20 | task | 0.2751 | 0.0498 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-ef-seed0-lam0p123457.json` | EF-EWC | 0 | 0.1235 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2557 | 0.0155 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-ef-seed0-lam0p37037.json` | EF-EWC | 0 | 0.3704 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2557 | 0.0155 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-ef-seed0-lam10.json` | EF-EWC | 0 | 10 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2559 | 0.0158 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-ef-seed0-lam1p11111.json` | EF-EWC | 0 | 1.1111 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2557 | 0.0155 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-ef-seed0-lam270.json` | EF-EWC | 0 | 270 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2573 | 0.0181 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-ef-seed0-lam30.json` | EF-EWC | 0 | 30 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2562 | 0.0162 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-ef-seed0-lam3p33333.json` | EF-EWC | 0 | 3.3333 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2558 | 0.0156 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-ef-seed0-lam90.json` | EF-EWC | 0 | 90 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2565 | 0.0172 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc-seed0-lam0p123457.json` | IEWC | 0 | 0.1235 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2558 | 0.0156 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc-seed0-lam0p37037.json` | IEWC | 0 | 0.3704 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.256 | 0.0158 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc-seed0-lam10.json` | IEWC | 0 | 10 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2575 | 0.0185 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc-seed0-lam1p11111.json` | IEWC | 0 | 1.1111 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2563 | 0.0163 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc-seed0-lam270.json` | IEWC | 0 | 270 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2971 | 0.0353 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc-seed0-lam30.json` | IEWC | 0 | 30 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2638 | 0.0223 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc-seed0-lam3p33333.json` | IEWC | 0 | 3.3333 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2567 | 0.0174 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc-seed0-lam90.json` | IEWC | 0 | 90 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2794 | 0.0333 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc_gss-seed0-lam10.json` | IEWC-GSS | 0 | 10 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2563 | 0.0166 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc_gss-seed0-lam1p11111.json` | IEWC-GSS | 0 | 1.1111 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2559 | 0.0158 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc_gss-seed0-lam270.json` | IEWC-GSS | 0 | 270 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2951 | 0.0276 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc_gss-seed0-lam30.json` | IEWC-GSS | 0 | 30 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.263 | 0.0204 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc_gss-seed0-lam3p33333.json` | IEWC-GSS | 0 | 3.3333 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2556 | 0.0161 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-iewc_gss-seed0-lam90.json` | IEWC-GSS | 0 | 90 | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.278 | 0.0286 |
+| `forecasting-longhorizon-patchtst-3task-tasknorm-guard-sequential-seed0.json` | Sequential | 0 | - | long_horizon | Weather,ECL,Traffic | PatchTST d=256, L=4, H=8, ff=512, p=16, s=8 | 336->96 | train=16, eval=8 | 6 | task | 0.2457 | 0.0042 |
 | `pilot-m4-forecast-ef.json` | EF-EWC | 0 | 10 | - | hourly,weekly,daily | TransformerEncoder d=64, L=2, H=4, ff=128 | 48->12 | train=4, eval=- | 3 | - | 1.9959 | 0.7133 |
 | `pilot-m4-forecast-iewc.json` | IEWC | 0 | 10 | - | hourly,weekly,daily | TransformerEncoder d=64, L=2, H=4, ff=128 | 48->12 | train=4, eval=- | 3 | - | 2.0085 | 0.7272 |
 | `pilot-m4-forecast-sequential.json` | Sequential | 0 | - | - | hourly,weekly,daily | TransformerEncoder d=64, L=2, H=4, ff=128 | 48->12 | train=4, eval=- | 3 | - | 2.0826 | 0.8395 |
@@ -251,10 +302,21 @@ Total runs: `91`.
 
 ## NLP Text Classification
 
-Total runs: `99`.
+Total runs: `110`.
 
 | artifact | method | seed | lambda | model | adaptation | distributions | train/eval cap | epochs | batch | final avg accuracy | forgetting |
 | --- | --- | ---: | ---: | --- | --- | --- | --- | ---: | ---: | ---: | ---: |
+| `nlp-modernbert-base-smoke-ef-seed0-lam100.json` | EF-EWC | 0 | 100 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
+| `nlp-modernbert-base-smoke-ef-seed0-lam2700.json` | EF-EWC | 0 | 2700 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5469 | 0 |
+| `nlp-modernbert-base-smoke-ef-seed0-lam300.json` | EF-EWC | 0 | 300 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
+| `nlp-modernbert-base-smoke-ef-seed0-lam33p3333.json` | EF-EWC | 0 | 33.3333 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
+| `nlp-modernbert-base-smoke-ef-seed0-lam900.json` | EF-EWC | 0 | 900 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
+| `nlp-modernbert-base-smoke-iewc-seed0-lam100.json` | IEWC | 0 | 100 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
+| `nlp-modernbert-base-smoke-iewc-seed0-lam2700.json` | IEWC | 0 | 2700 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
+| `nlp-modernbert-base-smoke-iewc-seed0-lam300.json` | IEWC | 0 | 300 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
+| `nlp-modernbert-base-smoke-iewc-seed0-lam33p3333.json` | IEWC | 0 | 33.3333 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
+| `nlp-modernbert-base-smoke-iewc-seed0-lam900.json` | IEWC | 0 | 900 | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5469 | 0 |
+| `nlp-modernbert-base-smoke-sequential-seed0.json` | Sequential | 0 | - | answerdotai/ModernBERT-base | lora | sst2->mrpc | train=32, eval=32 | 1 | 4 | 0.5312 | 0 |
 | `nlp-t5-lora-glue-sst2-mrpc-qqp-1024-e3-ef-seed0-lam1.json` | EF-EWC | 0 | 1 | t5-small | lora | sst2->mrpc->qqp | train=1024, eval=512 | 3 | 16 | 0.5525 | 0.2405 |
 | `nlp-t5-lora-glue-sst2-mrpc-qqp-1024-e3-ef-seed0-lam10.json` | EF-EWC | 0 | 10 | t5-small | lora | sst2->mrpc->qqp | train=1024, eval=512 | 3 | 16 | 0.5505 | 0.2412 |
 | `nlp-t5-lora-glue-sst2-mrpc-qqp-1024-e3-ef-seed0-lam100.json` | EF-EWC | 0 | 100 | t5-small | lora | sst2->mrpc->qqp | train=1024, eval=512 | 3 | 16 | 0.5525 | 0.2373 |
@@ -354,3 +416,123 @@ Total runs: `99`.
 | `smoke-nlp-iewc.json` | IEWC | 0 | 100 | roberta-base | lora | synthetic_a->synthetic_b | train=16, eval=16 | 1 | 8 | 0.5 | 0 |
 | `smoke-nlp-sequential.json` | Sequential | 0 | - | roberta-base | full | synthetic_a->synthetic_b | train=16, eval=16 | 1 | 8 | 0.5 | 0 |
 | `smoke-nlp-t5-gss.json` | IEWC-GSS | 0 | 1 | t5-small | lora | sst2->mrpc | train=8, eval=8 | 1 | 2 | 0.5625 | 0 |
+
+## TRACE Decoder-Only LLM
+
+Total runs: `113`.
+
+| artifact | method | seed | lambda | model | LoRA rank | answer mode | distributions | train/eval cap | epochs | batch/accum | final avg score | forgetting | final avg NLL |
+| --- | --- | ---: | ---: | --- | ---: | --- | --- | --- | ---: | --- | ---: | ---: | ---: |
+| `trace-qwen05-trace-3task-guard-ef-seed0-lam0p111111.json` | EF-EWC | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.375 | 0.1094 | 1.5687 |
+| `trace-qwen05-trace-3task-guard-ef-seed0-lam0p333333.json` | EF-EWC | 0 | 0.3333 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.3854 | 0.1094 | 1.5543 |
+| `trace-qwen05-trace-3task-guard-ef-seed0-lam1.json` | EF-EWC | 0 | 1 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.375 | 0.125 | 1.5571 |
+| `trace-qwen05-trace-3task-guard-ef-seed0-lam3.json` | EF-EWC | 0 | 3 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.3854 | 0.125 | 1.571 |
+| `trace-qwen05-trace-3task-guard-ef-seed0-lam9.json` | EF-EWC | 0 | 9 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.375 | 0.125 | 1.5562 |
+| `trace-qwen05-trace-3task-guard-ewc_dr-seed0-lam0p0123457.json` | EWC-DR | 0 | 0.0123 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.375 | 0.125 | 1.5878 |
+| `trace-qwen05-trace-3task-guard-ewc_dr-seed0-lam0p037037.json` | EWC-DR | 0 | 0.037 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.3958 | 0.1094 | 1.5648 |
+| `trace-qwen05-trace-3task-guard-ewc_dr-seed0-lam0p111111.json` | EWC-DR | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.3854 | 0.1094 | 1.5506 |
+| `trace-qwen05-trace-3task-guard-ewc_dr-seed0-lam0p333333.json` | EWC-DR | 0 | 0.3333 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.375 | 0.1094 | 1.547 |
+| `trace-qwen05-trace-3task-guard-ewc_dr-seed0-lam1.json` | EWC-DR | 0 | 1 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.375 | 0.1094 | 1.5438 |
+| `trace-qwen05-trace-3task-guard-ewc_dr-seed0-lam3.json` | EWC-DR | 0 | 3 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.3854 | 0.1094 | 1.5259 |
+| `trace-qwen05-trace-3task-guard-ewc_dr-seed0-lam9.json` | EWC-DR | 0 | 9 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.3854 | 0.1094 | 1.5514 |
+| `trace-qwen05-trace-3task-guard-iewc-seed0-lam0p111111.json` | IEWC | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.3646 | 0.125 | 1.5665 |
+| `trace-qwen05-trace-3task-guard-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.4271 | 0.1094 | 1.5923 |
+| `trace-qwen05-trace-choice-3task-guard-ef-seed0-lam0p111111.json` | EF-EWC | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4375 | 0.0312 | 1.538 |
+| `trace-qwen05-trace-choice-3task-guard-ef-seed0-lam0p333333.json` | EF-EWC | 0 | 0.3333 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4375 | 0.0312 | 1.5289 |
+| `trace-qwen05-trace-choice-3task-guard-ef-seed0-lam1.json` | EF-EWC | 0 | 1 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4427 | 0.0312 | 1.5267 |
+| `trace-qwen05-trace-choice-3task-guard-ef-seed0-lam27.json` | EF-EWC | 0 | 27 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4323 | 0.0312 | 1.508 |
+| `trace-qwen05-trace-choice-3task-guard-ef-seed0-lam3.json` | EF-EWC | 0 | 3 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4375 | 0.0312 | 1.5394 |
+| `trace-qwen05-trace-choice-3task-guard-ef-seed0-lam9.json` | EF-EWC | 0 | 9 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4479 | 0.0234 | 1.5229 |
+| `trace-qwen05-trace-choice-3task-guard-ewc_dr-seed0-lam0p111111.json` | EWC-DR | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4375 | 0.0312 | 1.5283 |
+| `trace-qwen05-trace-choice-3task-guard-ewc_dr-seed0-lam0p333333.json` | EWC-DR | 0 | 0.3333 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4427 | 0.0312 | 1.5202 |
+| `trace-qwen05-trace-choice-3task-guard-ewc_dr-seed0-lam1.json` | EWC-DR | 0 | 1 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4375 | 0.0312 | 1.5153 |
+| `trace-qwen05-trace-choice-3task-guard-ewc_dr-seed0-lam27.json` | EWC-DR | 0 | 27 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4375 | 0.0312 | 1.4726 |
+| `trace-qwen05-trace-choice-3task-guard-ewc_dr-seed0-lam3.json` | EWC-DR | 0 | 3 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4479 | 0.0312 | 1.5077 |
+| `trace-qwen05-trace-choice-3task-guard-ewc_dr-seed0-lam9.json` | EWC-DR | 0 | 9 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4531 | 0.0312 | 1.5136 |
+| `trace-qwen05-trace-choice-3task-guard-iewc-seed0-lam0p037037.json` | IEWC | 0 | 0.037 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4427 | 0.0312 | 1.5259 |
+| `trace-qwen05-trace-choice-3task-guard-iewc-seed0-lam0p111111.json` | IEWC | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4427 | 0.0312 | 1.5356 |
+| `trace-qwen05-trace-choice-3task-guard-iewc-seed0-lam0p333333.json` | IEWC | 0 | 0.3333 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4375 | 0.0312 | 1.5208 |
+| `trace-qwen05-trace-choice-3task-guard-iewc-seed0-lam1.json` | IEWC | 0 | 1 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4375 | 0.0312 | 1.5196 |
+| `trace-qwen05-trace-choice-3task-guard-iewc-seed0-lam3.json` | IEWC | 0 | 3 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4427 | 0.0312 | 1.528 |
+| `trace-qwen05-trace-choice-3task-guard-iewc-seed0-lam9.json` | IEWC | 0 | 9 | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4427 | 0.0312 | 1.5036 |
+| `trace-qwen05-trace-choice-3task-guard-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4427 | 0.0547 | 1.5826 |
+| `trace-qwen05-trace-choice-learn-guard-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=64 | 2 | 2/8 | 0.4427 | 0.0547 | 1.5826 |
+| `trace-qwen05-trace-choiceanswer-3task-guard-ef-seed0-lam0p037037.json` | EF-EWC | 0 | 0.037 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4767 | 0.095 | 0.6197 |
+| `trace-qwen05-trace-choiceanswer-3task-guard-ef-seed0-lam0p111111.json` | EF-EWC | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4867 | 0.075 | 0.6277 |
+| `trace-qwen05-trace-choiceanswer-3task-guard-ef-seed0-lam0p333333.json` | EF-EWC | 0 | 0.3333 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.47 | 0.105 | 0.6372 |
+| `trace-qwen05-trace-choiceanswer-3task-guard-ef-seed0-lam1.json` | EF-EWC | 0 | 1 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4833 | 0.09 | 0.6215 |
+| `trace-qwen05-trace-choiceanswer-3task-guard-ef-seed0-lam3.json` | EF-EWC | 0 | 3 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4767 | 0.09 | 0.6159 |
+| `trace-qwen05-trace-choiceanswer-3task-guard-ef-seed0-lam9.json` | EF-EWC | 0 | 9 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.48 | 0.09 | 0.6103 |
+| `trace-qwen05-trace-choiceanswer-3task-guard-ewc_dr-seed0-lam0p111111.json` | EWC-DR | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.47 | 0.105 | 0.6468 |
+| `trace-qwen05-trace-choiceanswer-3task-guard-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.5133 | 0.065 | 0.5888 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc-seed0-lam0p111111.json` | IEWC | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4767 | 0.09 | 0.6225 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc-seed0-lam0p333333.json` | IEWC | 0 | 0.3333 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4867 | 0.09 | 0.6057 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc-seed0-lam1.json` | IEWC | 0 | 1 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4767 | 0.09 | 0.6139 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc-seed0-lam3.json` | IEWC | 0 | 3 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4833 | 0.075 | 0.6021 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc-seed0-lam9.json` | IEWC | 0 | 9 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4833 | 0.08 | 0.5662 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc_gss-seed0-lam0p111111.json` | IEWC-GSS | 0 | 0.1111 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4733 | 0.1 | 0.6266 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc_gss-seed0-lam0p333333.json` | IEWC-GSS | 0 | 0.3333 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4767 | 0.1 | 0.6124 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc_gss-seed0-lam1.json` | IEWC-GSS | 0 | 1 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4667 | 0.09 | 0.6082 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc_gss-seed0-lam243.json` | IEWC-GSS | 0 | 243 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4967 | 0.085 | 0.4991 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc_gss-seed0-lam27.json` | IEWC-GSS | 0 | 27 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.5133 | 0.035 | 0.4748 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc_gss-seed0-lam3.json` | IEWC-GSS | 0 | 3 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.4867 | 0.095 | 0.5922 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc_gss-seed0-lam81.json` | IEWC-GSS | 0 | 81 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.5233 | 0.04 | 0.4713 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-iewc_gss-seed0-lam9.json` | IEWC-GSS | 0 | 9 | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.49 | 0.07 | 0.5494 |
+| `trace-qwen05-trace-choiceanswer-3task-iefcompact-guard-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-0.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=256, eval=128 | 3 | 2/8 | 0.5133 | 0.065 | 0.5888 |
+| `trace-qwen05-trace-learn-guard-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-0.5B-Instruct | 8 | - | C-STANCE->FOMC->ScienceQA | train=128, eval=32 | 2 | 2/8 | 0.4271 | 0.1094 | 1.5923 |
+| `trace-qwen05-trace-smoke-ef-seed0-lam10.json` | EF-EWC | 0 | 10 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.25 | 0 | 11.2811 |
+| `trace-qwen05-trace-smoke-ef-seed0-lam1p11111.json` | EF-EWC | 0 | 1.1111 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.25 | 0 | 11.2403 |
+| `trace-qwen05-trace-smoke-ef-seed0-lam30.json` | EF-EWC | 0 | 30 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.125 | 0 | 11.2362 |
+| `trace-qwen05-trace-smoke-ef-seed0-lam3p33333.json` | EF-EWC | 0 | 3.3333 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.25 | 0 | 11.2534 |
+| `trace-qwen05-trace-smoke-ef-seed0-lam90.json` | EF-EWC | 0 | 90 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.125 | 0 | 11.225 |
+| `trace-qwen05-trace-smoke-iewc-seed0-lam10.json` | IEWC | 0 | 10 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.125 | 0 | 11.2618 |
+| `trace-qwen05-trace-smoke-iewc-seed0-lam1p11111.json` | IEWC | 0 | 1.1111 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.25 | 0 | 11.2325 |
+| `trace-qwen05-trace-smoke-iewc-seed0-lam30.json` | IEWC | 0 | 30 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.125 | 0 | 11.2927 |
+| `trace-qwen05-trace-smoke-iewc-seed0-lam3p33333.json` | IEWC | 0 | 3.3333 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.125 | 0 | 11.2454 |
+| `trace-qwen05-trace-smoke-iewc-seed0-lam90.json` | IEWC | 0 | 90 | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.125 | 0 | 11.2429 |
+| `trace-qwen05-trace-smoke-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-0.5B-Instruct | 4 | - | C-STANCE->FOMC | train=4, eval=4 | 1 | 1/2 | 0.125 | 0 | 11.2815 |
+| `trace-qwen15-trace-choiceanswer-smoke-iewc_gss-seed0-lam243.json` | IEWC-GSS | 0 | 243 | Qwen/Qwen2.5-1.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5521 | 0.0312 | 6.6383 |
+| `trace-qwen15-trace-choiceanswer-smoke-iewc_gss-seed0-lam27.json` | IEWC-GSS | 0 | 27 | Qwen/Qwen2.5-1.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5521 | 0.0469 | 6.5771 |
+| `trace-qwen15-trace-choiceanswer-smoke-iewc_gss-seed0-lam729.json` | IEWC-GSS | 0 | 729 | Qwen/Qwen2.5-1.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5729 | 0 | 6.8511 |
+| `trace-qwen15-trace-choiceanswer-smoke-iewc_gss-seed0-lam81.json` | IEWC-GSS | 0 | 81 | Qwen/Qwen2.5-1.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5625 | 0.0312 | 6.6169 |
+| `trace-qwen15-trace-choiceanswer-smoke-iewc_gss-seed0-lam9.json` | IEWC-GSS | 0 | 9 | Qwen/Qwen2.5-1.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5521 | 0.0469 | 6.6069 |
+| `trace-qwen15-trace-choiceanswer-smoke-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-1.5B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5417 | 0.0469 | 6.6407 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ef-seed0-lam0p111111.json` | EF-EWC | 0 | 0.1111 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5833 | 0.0957 | 0.5061 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ef-seed0-lam0p333333.json` | EF-EWC | 0 | 0.3333 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5911 | 0.0801 | 0.4919 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ef-seed0-lam1.json` | EF-EWC | 0 | 1 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.599 | 0.0723 | 0.4848 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ef-seed0-lam3.json` | EF-EWC | 0 | 3 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5938 | 0.082 | 0.5022 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ef-seed0-lam9.json` | EF-EWC | 0 | 9 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5964 | 0.0723 | 0.4971 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ef-seed1-lam1.json` | EF-EWC | 1 | 1 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5951 | 0.0781 | 0.4611 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ef-seed2-lam1.json` | EF-EWC | 2 | 1 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5977 | 0.0781 | 0.5061 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ewc_dr-seed0-lam0p111111.json` | EWC-DR | 0 | 0.1111 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5951 | 0.082 | 0.4927 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ewc_dr-seed0-lam0p333333.json` | EWC-DR | 0 | 0.3333 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5807 | 0.1016 | 0.5124 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ewc_dr-seed0-lam1.json` | EWC-DR | 0 | 1 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6029 | 0.0684 | 0.4961 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ewc_dr-seed0-lam3.json` | EWC-DR | 0 | 3 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5898 | 0.084 | 0.4864 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ewc_dr-seed0-lam9.json` | EWC-DR | 0 | 9 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5964 | 0.0586 | 0.469 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ewc_dr-seed1-lam1.json` | EWC-DR | 1 | 1 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5911 | 0.0898 | 0.4487 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-ewc_dr-seed2-lam1.json` | EWC-DR | 2 | 1 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5977 | 0.0762 | 0.4919 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc-seed0-lam0p037037.json` | IEWC | 0 | 0.037 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5938 | 0.0762 | 0.4995 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc-seed0-lam0p111111.json` | IEWC | 0 | 0.1111 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5977 | 0.0684 | 0.501 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc-seed0-lam0p333333.json` | IEWC | 0 | 0.3333 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5872 | 0.0918 | 0.5055 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc-seed0-lam1.json` | IEWC | 0 | 1 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5977 | 0.0742 | 0.4941 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc-seed0-lam3.json` | IEWC | 0 | 3 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5794 | 0.0938 | 0.4983 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc-seed0-lam9.json` | IEWC | 0 | 9 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5833 | 0.084 | 0.496 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc-seed1-lam0p111111.json` | IEWC | 1 | 0.1111 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5911 | 0.0918 | 0.4816 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc-seed2-lam0p111111.json` | IEWC | 2 | 0.1111 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5924 | 0.0859 | 0.4962 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc_gss-seed0-lam177147.json` | IEWC-GSS | 0 | 1.77e+05 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6315 | 0.0098 | 4.7776 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc_gss-seed0-lam19683.json` | IEWC-GSS | 0 | 1.97e+04 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6328 | 0.0059 | 0.4573 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc_gss-seed0-lam2187.json` | IEWC-GSS | 0 | 2187 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6029 | 0.0234 | 0.4095 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc_gss-seed0-lam59049.json` | IEWC-GSS | 0 | 5.9e+04 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6341 | 0 | 0.6129 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc_gss-seed0-lam6561.json` | IEWC-GSS | 0 | 6561 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6211 | 0.0059 | 0.419 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc_gss-seed0-lam729.json` | IEWC-GSS | 0 | 729 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6068 | 0.0352 | 0.4101 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc_gss-seed1-lam59049.json` | IEWC-GSS | 1 | 5.9e+04 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6289 | 0 | 0.5531 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-iewc_gss-seed2-lam59049.json` | IEWC-GSS | 2 | 5.9e+04 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.6185 | 0.0137 | 0.6051 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5781 | 0.1016 | 0.4733 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-sequential-seed1.json` | Sequential | 1 | - | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5729 | 0.123 | 0.4821 |
+| `trace-qwen3-trace-choiceanswer-3task-512-e2-sequential-seed2.json` | Sequential | 2 | - | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=512, eval=256 | 2 | 2/8 | 0.5768 | 0.1172 | 0.5177 |
+| `trace-qwen3-trace-choiceanswer-smoke-iewc_gss-seed0-lam2187.json` | IEWC-GSS | 0 | 2187 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5729 | 0.0781 | 9.3242 |
+| `trace-qwen3-trace-choiceanswer-smoke-iewc_gss-seed0-lam243.json` | IEWC-GSS | 0 | 243 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5312 | 0.125 | 8.4378 |
+| `trace-qwen3-trace-choiceanswer-smoke-iewc_gss-seed0-lam6561.json` | IEWC-GSS | 0 | 6561 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.6146 | 0.0312 | 10.4528 |
+| `trace-qwen3-trace-choiceanswer-smoke-iewc_gss-seed0-lam729.json` | IEWC-GSS | 0 | 729 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5833 | 0.0469 | 8.6571 |
+| `trace-qwen3-trace-choiceanswer-smoke-iewc_gss-seed0-lam81.json` | IEWC-GSS | 0 | 81 | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5312 | 0.1406 | 8.3408 |
+| `trace-qwen3-trace-choiceanswer-smoke-sequential-seed0.json` | Sequential | 0 | - | Qwen/Qwen2.5-3B-Instruct | 8 | choice | C-STANCE->FOMC->ScienceQA | train=64, eval=32 | 1 | 1/8 | 0.5417 | 0.0938 | 8.3594 |

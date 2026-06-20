@@ -203,6 +203,46 @@ def nlp_rows(runs: list[dict[str, Any]]) -> list[str]:
     return rows
 
 
+def trace_rows(runs: list[dict[str, Any]]) -> list[str]:
+    rows = [
+        "## TRACE Decoder-Only LLM",
+        "",
+        f"Total runs: `{len(runs)}`.",
+        "",
+        "| artifact | method | seed | lambda | model | LoRA rank | answer mode | distributions | train/eval cap | epochs | batch/accum | final avg score | forgetting | final avg NLL |",
+        "| --- | --- | ---: | ---: | --- | ---: | --- | --- | --- | ---: | --- | ---: | ---: | ---: |",
+    ]
+    for data in runs:
+        cfg = config(data)
+        tasks = "->".join(str(v) for v in cfg.get("tasks", []))
+        caps = f"train={cfg.get('max_train_samples', '-')}, eval={cfg.get('max_eval_samples', '-')}"
+        batch = f"{cfg.get('batch_size', '-')}/{cfg.get('gradient_accumulation_steps', '-')}"
+        rows.append(
+            "| "
+            + " | ".join(
+                [
+                    f"`{data['_artifact']}`",
+                    method_label(data.get("method", "")),
+                    str(cfg.get("seed", "-")),
+                    lambda_value(data),
+                    str(cfg.get("model_name", "-")),
+                    str(cfg.get("lora_rank", "-")),
+                    str(cfg.get("answer_mode", "-")),
+                    tasks,
+                    caps,
+                    str(cfg.get("epochs_per_task", "-")),
+                    batch,
+                    fmt_num(data.get("final_avg_score")),
+                    fmt_num(data.get("avg_forgetting_score")),
+                    fmt_num(data.get("final_avg_nll")),
+                ]
+            )
+            + " |"
+        )
+    rows.append("")
+    return rows
+
+
 def build_raw_ledger() -> None:
     runs = training_runs()
     vision = [run for run in runs if run.get("experiment") == "empirical2_vision_cl"]
@@ -212,18 +252,20 @@ def build_raw_ledger() -> None:
         if run.get("experiment") in {"empirical2_forecasting_cl", "empirical2_m4_forecasting_cl"}
     ]
     nlp = [run for run in runs if run.get("experiment") == "empirical2_nlp_cl"]
+    trace = [run for run in runs if run.get("experiment") == "empirical2_trace_cl"]
 
     lines = [
         "# Raw Empirical Training Runs",
         "",
         "This tracked ledger records every individual empirical-2 training-run JSON currently present in `docs/empirical-2/artifacts/`, excluding only `*-tuning-summary.json` files because those summarize multiple runs rather than train a model. Raw artifacts and plots are ignored, but this per-run index is committed for auditability.",
         "",
-        f"Total logged training runs: `{len(vision) + len(forecasting) + len(nlp)}`.",
+        f"Total logged training runs: `{len(vision) + len(forecasting) + len(nlp) + len(trace)}`.",
         "",
     ]
     lines.extend(vision_rows(vision))
     lines.extend(forecasting_rows(forecasting))
     lines.extend(nlp_rows(nlp))
+    lines.extend(trace_rows(trace))
     RAW_LEDGER.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -246,14 +288,24 @@ def family_name(summary: dict[str, Any]) -> str:
         return "T5-small LoRA GLUE guard, SST-2 -> MRPC -> QQP"
     if tag == "t5base-lora-glue-sst2-mrpc-qqp-2048-e3-highlambda":
         return "T5-base LoRA GLUE, SST-2 -> MRPC -> QQP"
+    if tag.startswith("qwen05-trace-choiceanswer-3task"):
+        return "Qwen2.5-0.5B LoRA TRACE, C-STANCE -> FOMC -> ScienceQA"
+    if tag.startswith("qwen15-trace-choiceanswer"):
+        return "Qwen2.5-1.5B LoRA TRACE, C-STANCE -> FOMC -> ScienceQA"
+    if tag.startswith("qwen3-trace-choiceanswer"):
+        return "Qwen2.5-3B LoRA TRACE, C-STANCE -> FOMC -> ScienceQA"
     if cfg.get("frequencies"):
         return f"{tag}: {' -> '.join(cfg['frequencies'])}"
+    if cfg.get("tasks") and summary.get("group") == "trace":
+        return f"{tag}: {' -> '.join(cfg['tasks'])}"
     return tag
 
 
 def metric_keys(group: str) -> tuple[str, str, bool]:
     if group in {"vision", "nlp"}:
         return "final_avg_accuracy", "avg_forgetting", True
+    if group == "trace":
+        return "final_avg_score", "avg_forgetting_score", True
     return "final_avg_mse", "avg_forgetting_mse", False
 
 
@@ -310,8 +362,12 @@ def selected_result_row(summary: dict[str, Any], method: str, selection: dict[st
 
 def selected_sections(summaries: list[dict[str, Any]], group: str, heading: str) -> list[str]:
     metric_key, forgetting_key, higher_is_better = metric_keys(group)
-    metric_label = "Final avg accuracy" if higher_is_better else "Final avg MSE"
-    forgetting_label = "Forgetting" if higher_is_better else "Forgetting MSE"
+    if group == "trace":
+        metric_label = "Final avg score"
+        forgetting_label = "Forgetting score"
+    else:
+        metric_label = "Final avg accuracy" if higher_is_better else "Final avg MSE"
+        forgetting_label = "Forgetting" if higher_is_better else "Forgetting MSE"
     lines = [
         f"## {heading}",
         "",
@@ -339,6 +395,7 @@ def build_selected_tables() -> None:
     lines.extend(selected_sections(summaries, "vision", "Vision Classification"))
     lines.extend(selected_sections(summaries, "forecasting", "Time-Series Forecasting / Regression"))
     lines.extend(selected_sections(summaries, "nlp", "NLP Text Classification"))
+    lines.extend(selected_sections(summaries, "trace", "TRACE Decoder-Only LLM"))
     RESULT_TABLES.write_text("\n".join(lines), encoding="utf-8")
 
 

@@ -103,12 +103,27 @@ def _make_model_and_tokenizer(config: NLPCLConfig):
             num_labels=2,
         )
         return BertForSequenceClassification(model_config), None
-    tokenizer = AutoTokenizer.from_pretrained(config.model_name, use_fast=True)
-    model = AutoModelForSequenceClassification.from_pretrained(config.model_name, num_labels=2)
+    tokenizer = AutoTokenizer.from_pretrained(config.model_name, use_fast=True, trust_remote_code=True)
+    model = AutoModelForSequenceClassification.from_pretrained(
+        config.model_name,
+        num_labels=2,
+        trust_remote_code=True,
+    )
     return model, tokenizer
 
 
-def _configure_lora(model: nn.Module, config: NLPCLConfig) -> None:
+def _lora_target_modules(model_name: str) -> list[str]:
+    lowered = model_name.lower()
+    if "modernbert" in lowered:
+        return ["Wqkv", "Wi", "Wo"]
+    if "t5" in lowered:
+        return ["q", "v"]
+    if any(name in lowered for name in ("qwen", "llama", "mistral", "gemma")):
+        return ["q_proj", "v_proj"]
+    return ["query", "value"]
+
+
+def _configure_lora(model: nn.Module, config: NLPCLConfig) -> nn.Module | None:
     if config.adaptation == "full":
         for param in model.parameters():
             param.requires_grad = True
@@ -117,15 +132,12 @@ def _configure_lora(model: nn.Module, config: NLPCLConfig) -> None:
         raise ValueError(f"Unknown NLP adaptation: {config.adaptation}")
     from peft import LoraConfig, TaskType, get_peft_model
 
-    target_modules = ["query", "value"]
-    if "t5" in config.model_name.lower():
-        target_modules = ["q", "v"]
     lora_config = LoraConfig(
         task_type=TaskType.SEQ_CLS,
         r=config.lora_rank,
         lora_alpha=config.lora_alpha,
         lora_dropout=0.0,
-        target_modules=target_modules,
+        target_modules=_lora_target_modules(config.model_name),
     )
     model = get_peft_model(model, lora_config)
     for name, param in model.named_parameters():
