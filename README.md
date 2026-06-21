@@ -1,6 +1,7 @@
 # Improved Elastic Weight Consolidation
 
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20724067-blue)](https://doi.org/10.5281/zenodo.20724067)
+
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20786362-blue)](https://doi.org/10.5281/zenodo.20724067)
 [![PDF](https://img.shields.io/badge/PDF-paper-blue)](https://davidewiest.com/files/improved-elastic-weight-consolidation.pdf)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.12-blue)](https://www.python.org/)
 
@@ -45,7 +46,7 @@ low-rank IEWC plugins. Existing keyword arguments such as `ewc_lambda`,
   title = {Improved Elastic Weight Consolidation as an Optimization Constraint for Continual Learning},
   year = {2026},
   publisher = {Zenodo},
-  doi = {10.5281/zenodo.20724067},
+  doi = {10.5281/zenodo.20786362},
   url = {https://zenodo.org/records/20724067}
 }
 ```
